@@ -1,8 +1,8 @@
 {
-  "name": "taist-addon-bootstrap",
+  "name": "nimble-freshbooks-integration",
   "version": "0.0.1",
   "author": "Vladimir Rybakov",
-  "description": "Taist bootstrap addon",
+  "description": "Nimble Freshbooks Integration",
   "dependencies": {
     "browserify": "~4.1.5",
     "grunt": "~0.4.0",
