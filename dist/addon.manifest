@@ -1,8 +1,8 @@
 {
-  "id": "taist-bootstrap",
-  "title": "Taist Botstrap",
-  "siteName": "Google",
+  "id": "nimble-freshbooks-integration",
+  "title": "Nimble Freshbooks Integration",
+  "siteName": "Nimble",
   "js": "addon.js",
-  "shortDescription": "Sample project for tai.st addon",
-  "siteRegexp": "google\\.\\w{2,4}"
+  "shortDescription": "Nimble Freshbooks Integration",
+  "siteRegexp": "nimble\\.com"
 }
