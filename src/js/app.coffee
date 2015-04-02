@@ -25,6 +25,11 @@ app =
   api: null
   exapi: {}
 
+  observer: null
+
+  options:
+    nimbleToken: null
+
   init: (api) ->
     app.api = api
 
