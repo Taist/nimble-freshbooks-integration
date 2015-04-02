@@ -11,6 +11,7 @@
     "grunt-contrib-concat": "*",
     "grunt-contrib-copy": "*",
     "grunt-contrib-watch": "*",
+    "q": "^1.2.0",
     "react": "^0.13.1"
   }
 }
