@@ -11,11 +11,10 @@ onCreateEstimate = ->
       organization: $t: contact.fields['parent company']?[0]?.value
       email: $t: contact.fields['email']?[0]?.value
 
-    console.log client
-
     app.fbAPI.createClient client
-  .then (fbClient) ->
-    console.log fbClient
+  .then (response) ->
+    if response.status = 'ok'
+      app.exapi.setCompanyData app.nimbleAPI.getDealIdFromUrl(), { freshBooksClient: response.client_id.$t }
   .catch (error) ->
     console.log error
 

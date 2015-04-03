@@ -2,10 +2,6 @@ app = null
 
 Q = require 'q'
 
-getDealIdFromUrl = ->
-  matches = location.hash.match /deals\/[^?]+\?id=([0-9a-f]{24})/
-  if matches then matches[1] else null
-
 sendNimbleRequest = (path) ->
   Q.when $.ajax
     url: path
@@ -14,8 +10,12 @@ sendNimbleRequest = (path) ->
       Authorization: "Nimble token=\"#{app.options.nimbleToken}\""
 
 nimbleAPI =
+  getDealIdFromUrl: ->
+    matches = location.hash.match /deals\/[^?]+\?id=([0-9a-f]{24})/
+    if matches then matches[1] else null
+
   getDealContact: () ->
-    if dealId = getDealIdFromUrl()
+    if dealId = nimbleAPI.getDealIdFromUrl()
       sendNimbleRequest "/api/deals/#{dealId}"
       .then (deal) ->
         if contactId = Object.keys(deal?.contacts)?[0]

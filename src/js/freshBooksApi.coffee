@@ -3,6 +3,9 @@ app = null
 Q = require 'q'
 XMLMapping = require 'xml-mapping'
 
+parseFBResponse = (result) ->
+  json = XMLMapping.load(result, throwErrors: true)
+  json.response
 
 sendFBRequest = (requestData) ->
   app.actions.getFreshBooksCreds()
@@ -15,7 +18,7 @@ sendFBRequest = (requestData) ->
       data: XMLMapping.dump requestData, throwErrors: true, header: true
       dataType: 'text'
   .then (result) ->
-    Q.resolve XMLMapping.load result, throwErrors: true
+    parseFBResponse result
   .catch (err) ->
     console.log err
 
@@ -35,11 +38,11 @@ sendFBRequestByProxy = (requestData) ->
       if error
         deferred.reject error
       else
-        console.log response.result
         deferred.resolve response.result
-
     deferred.promise
 
+  .then (result) ->
+    parseFBResponse result
   .catch (error) ->
     console.log error
 

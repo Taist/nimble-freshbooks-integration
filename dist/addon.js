@@ -34,13 +34,21 @@ app = {
 module.exports = app;
 
 },{"./freshBooksApi":2,"./nimbleApi":7,"q":32}],2:[function(require,module,exports){
-var Q, XMLMapping, app, freshBooksAPI, sendFBRequest, sendFBRequestByProxy;
+var Q, XMLMapping, app, freshBooksAPI, parseFBResponse, sendFBRequest, sendFBRequestByProxy;
 
 app = null;
 
 Q = require('q');
 
 XMLMapping = require('xml-mapping');
+
+parseFBResponse = function(result) {
+  var json;
+  json = XMLMapping.load(result, {
+    throwErrors: true
+  });
+  return json.response;
+};
 
 sendFBRequest = function(requestData) {
   return app.actions.getFreshBooksCreds().then(function(creds) {
@@ -57,9 +65,7 @@ sendFBRequest = function(requestData) {
       dataType: 'text'
     }));
   }).then(function(result) {
-    return Q.resolve(XMLMapping.load(result, {
-      throwErrors: true
-    }));
+    return parseFBResponse(result);
   })["catch"](function(err) {
     return console.log(err);
   });
@@ -84,11 +90,12 @@ sendFBRequestByProxy = function(requestData) {
       if (error) {
         return deferred.reject(error);
       } else {
-        console.log(response.result);
         return deferred.resolve(response.result);
       }
     });
     return deferred.promise;
+  }).then(function(result) {
+    return parseFBResponse(result);
   })["catch"](function(error) {
     return console.log(error);
   });
@@ -300,10 +307,13 @@ onCreateEstimate = function() {
         $t: (ref6 = contact.fields['email']) != null ? (ref7 = ref6[0]) != null ? ref7.value : void 0 : void 0
       }
     };
-    console.log(client);
     return app.fbAPI.createClient(client);
-  }).then(function(fbClient) {
-    return console.log(fbClient);
+  }).then(function(response) {
+    if (response.status = 'ok') {
+      return app.exapi.setCompanyData(app.nimbleAPI.getDealIdFromUrl(), {
+        freshBooksClient: response.client_id.$t
+      });
+    }
   })["catch"](function(error) {
     return console.log(error);
   });
@@ -359,21 +369,11 @@ module.exports = function() {
 };
 
 },{"../app":1,"../helpers/xmlHttpProxy":5,"../react/nimble/dealView":9,"react":187}],7:[function(require,module,exports){
-var Q, app, getDealIdFromUrl, nimbleAPI, sendNimbleRequest;
+var Q, app, nimbleAPI, sendNimbleRequest;
 
 app = null;
 
 Q = require('q');
-
-getDealIdFromUrl = function() {
-  var matches;
-  matches = location.hash.match(/deals\/[^?]+\?id=([0-9a-f]{24})/);
-  if (matches) {
-    return matches[1];
-  } else {
-    return null;
-  }
-};
 
 sendNimbleRequest = function(path) {
   return Q.when($.ajax({
@@ -386,9 +386,18 @@ sendNimbleRequest = function(path) {
 };
 
 nimbleAPI = {
+  getDealIdFromUrl: function() {
+    var matches;
+    matches = location.hash.match(/deals\/[^?]+\?id=([0-9a-f]{24})/);
+    if (matches) {
+      return matches[1];
+    } else {
+      return null;
+    }
+  },
   getDealContact: function() {
     var dealId;
-    if (dealId = getDealIdFromUrl()) {
+    if (dealId = nimbleAPI.getDealIdFromUrl()) {
       return sendNimbleRequest("/api/deals/" + dealId).then(function(deal) {
         var contactId, ref;
         if (contactId = (ref = Object.keys(deal != null ? deal.contacts : void 0)) != null ? ref[0] : void 0) {
