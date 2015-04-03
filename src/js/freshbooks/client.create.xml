@@ -55,3 +55,44 @@
     <vat_number></vat_number>
   </client>
 </request>
+
+request:
+  method: 'client.create'
+  client:
+    first_name: $t: contact.first_name
+    last_name: $t: contact.last_name
+    organization: $t: contact.company_name
+    email: $t:
+    username: $t:
+    password: $t:
+
+    contacts:
+      contact:
+         username: $t:
+         first_name: $t:
+         last_name: $t:
+         email: $t:
+         phone1: $t:
+         phone2: $t:
+
+    work_phone: $t:
+    home_phone: $t:
+    mobile: $t:
+    fax: $t:
+    language: $t:
+    currency_code: $t:
+    notes: $t:
+    p_street1: $t:
+    p_street2: $t:
+    p_city: $t:
+    p_state: $t:
+    p_country: $t:
+    p_code: $t:
+    s_street1: $t:
+    s_street2: $t:
+    s_city: $t:
+    s_state: $t:
+    s_country: $t:
+    s_code: $t:
+    vat_name: $t:
+    vat_number: $t:

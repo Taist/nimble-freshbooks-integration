@@ -1,7 +1,5 @@
 app = require '../app'
 
-React = require 'react'
-
 module.exports = ->
   app.observer.waitElement 'a[name=token]', (elem) ->
     container = document.createElement 'div'
@@ -21,5 +19,6 @@ module.exports = ->
       onPageCreds = getOnPageCreds()
       isIntegrationEnabled = ( onPageCreds.url is creds?.url and onPageCreds.token is creds?.token )
 
+      React = require 'react'
       reactPage = require '../react/freshbooks/apiEnable'
       React.render reactPage( { action, isIntegrationEnabled }), container

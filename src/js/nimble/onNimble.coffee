@@ -1,11 +1,16 @@
 app = require '../app'
-proxy = require '../helpers/xmlHttpProxy'
+
+onCreateEstimate = ->
+  app.nimbleAPI.getDealContact()
 
 onDealView = ->
   app.observer.waitElement '.DealView .profileInfoWrapper td.generalInfo', (elem) ->
     container = document.createElement 'div'
     elem.appendChild container
-    container.innerHTML = 'PUT BUTTON HERE'
+
+    React = require 'react'
+    reactPage = require '../react/nimble/dealView'
+    React.render reactPage( { onCreateEstimate } ), container
 
 routesByHashes =
   '^app/deals/view': onDealView
@@ -14,6 +19,8 @@ setRoutes = ->
   for hashRegexp, routeProcessor of routesByHashes
     do (hashRegexp, routeProcessor) =>
       app.api.hash.when hashRegexp, routeProcessor
+
+proxy = require '../helpers/xmlHttpProxy'
 
 extractNimbleAuthTokenFromRequest = ->
   proxy.onRequestFinish (request) ->
