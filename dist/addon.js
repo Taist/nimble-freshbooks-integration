@@ -34,7 +34,7 @@ app = {
 module.exports = app;
 
 },{"./freshBooksApi":2,"./nimbleApi":7,"q":32}],2:[function(require,module,exports){
-var Q, XMLMapping, app, freshBooksAPI, sendFBRequest;
+var Q, XMLMapping, app, freshBooksAPI, sendFBRequest, sendFBRequestByProxy;
 
 app = null;
 
@@ -65,6 +65,39 @@ sendFBRequest = function(requestData) {
   });
 };
 
+sendFBRequestByProxy = function(requestData) {
+  return app.actions.getFreshBooksCreds().then(function(creds) {
+    var deferred, options;
+    options = {
+      headers: {
+        Authorization: 'Basic ' + btoa(creds.token + ":")
+      },
+      method: 'POST',
+      data: XMLMapping.dump(requestData, {
+        throwErrors: true,
+        header: true
+      }),
+      dataType: 'text'
+    };
+    deferred = Q.defer();
+    app.api.proxy.jQueryAjax(creds.url, '', options, function(error, response) {
+      if (error) {
+        return deferred.reject(error);
+      } else {
+        console.log(response.result);
+        return deferred.resolve(response.result);
+      }
+    });
+    return deferred.promise;
+  })["catch"](function(error) {
+    return console.log(error);
+  });
+};
+
+if (location.host.match(/nimble\.com/i)) {
+  sendFBRequest = sendFBRequestByProxy;
+}
+
 freshBooksAPI = {
   getClients: function() {
     return sendFBRequest({
@@ -79,20 +112,8 @@ freshBooksAPI = {
     return sendFBRequest({
       request: {
         method: 'client.create',
-        client: {
-          first_name: {
-            $t: 'Jane'
-          },
-          last_name: {
-            $t: 'Doe'
-          },
-          email: {
-            $t: 'janedoe@freshbooks.com'
-          }
-        }
+        client: client
       }
-    }).then(function(result) {
-      return console.log(result);
     });
   }
 };
@@ -262,7 +283,30 @@ var app, extractNimbleAuthTokenFromRequest, onCreateEstimate, onDealView, proxy,
 app = require('../app');
 
 onCreateEstimate = function() {
-  return app.nimbleAPI.getDealContact();
+  return app.nimbleAPI.getDealContact().then(function(contact) {
+    var client, ref, ref1, ref2, ref3, ref4, ref5, ref6, ref7;
+    console.log(contact);
+    client = {
+      first_name: {
+        $t: (ref = contact.fields['first name']) != null ? (ref1 = ref[0]) != null ? ref1.value : void 0 : void 0
+      },
+      last_name: {
+        $t: (ref2 = contact.fields['last name']) != null ? (ref3 = ref2[0]) != null ? ref3.value : void 0 : void 0
+      },
+      organization: {
+        $t: (ref4 = contact.fields['parent company']) != null ? (ref5 = ref4[0]) != null ? ref5.value : void 0 : void 0
+      },
+      email: {
+        $t: (ref6 = contact.fields['email']) != null ? (ref7 = ref6[0]) != null ? ref7.value : void 0 : void 0
+      }
+    };
+    console.log(client);
+    return app.fbAPI.createClient(client);
+  }).then(function(fbClient) {
+    return console.log(fbClient);
+  })["catch"](function(error) {
+    return console.log(error);
+  });
 };
 
 onDealView = function() {
@@ -347,12 +391,9 @@ nimbleAPI = {
     if (dealId = getDealIdFromUrl()) {
       return sendNimbleRequest("/api/deals/" + dealId).then(function(deal) {
         var contactId, ref;
-        console.log(deal);
         if (contactId = (ref = Object.keys(deal != null ? deal.contacts : void 0)) != null ? ref[0] : void 0) {
-          return sendNimbleRequest("/api/v1/contact/" + contactId + "/summary");
+          return Q.resolve(deal.contacts[contactId]);
         }
-      }).then(function(contact) {
-        return console.log(contact);
       })["catch"](function(error) {
         return console.log(error);
       });

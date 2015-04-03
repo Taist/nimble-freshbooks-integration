@@ -59,10 +59,11 @@
 request:
   method: 'client.create'
   client:
-    first_name: $t: contact.first_name
-    last_name: $t: contact.last_name
-    organization: $t: contact.company_name
-    email: $t:
+    first_name: $t: contactFields['first name']?.value
+    last_name: $t: contactFields['last name']?.value
+    organization: $t: contactFields['parent company']?.value
+    email: $t: contactFields['email']?.value
+
     username: $t:
     password: $t:
 

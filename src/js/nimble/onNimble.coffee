@@ -2,6 +2,22 @@ app = require '../app'
 
 onCreateEstimate = ->
   app.nimbleAPI.getDealContact()
+  .then (contact) ->
+    console.log contact
+
+    client =
+      first_name: $t: contact.fields['first name']?[0]?.value
+      last_name: $t: contact.fields['last name']?[0]?.value
+      organization: $t: contact.fields['parent company']?[0]?.value
+      email: $t: contact.fields['email']?[0]?.value
+
+    console.log client
+
+    app.fbAPI.createClient client
+  .then (fbClient) ->
+    console.log fbClient
+  .catch (error) ->
+    console.log error
 
 onDealView = ->
   app.observer.waitElement '.DealView .profileInfoWrapper td.generalInfo', (elem) ->

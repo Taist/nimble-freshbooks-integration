@@ -18,11 +18,8 @@ nimbleAPI =
     if dealId = getDealIdFromUrl()
       sendNimbleRequest "/api/deals/#{dealId}"
       .then (deal) ->
-        console.log deal
         if contactId = Object.keys(deal?.contacts)?[0]
-          sendNimbleRequest "/api/v1/contact/#{contactId}/summary"
-      .then (contact) ->
-        console.log contact
+          Q.resolve deal.contacts[contactId]
       .catch (error) ->
         console.log error
 

@@ -19,6 +19,32 @@ sendFBRequest = (requestData) ->
   .catch (err) ->
     console.log err
 
+sendFBRequestByProxy = (requestData) ->
+  app.actions.getFreshBooksCreds()
+  .then (creds) ->
+    options =
+      headers:
+        Authorization: 'Basic ' + btoa "#{creds.token}:"
+      method: 'POST'
+      data: XMLMapping.dump requestData, throwErrors: true, header: true
+      dataType: 'text'
+
+    deferred = Q.defer()
+
+    app.api.proxy.jQueryAjax creds.url, '', options, (error, response) ->
+      if error
+        deferred.reject error
+      else
+        console.log response.result
+        deferred.resolve response.result
+
+    deferred.promise
+
+  .catch (error) ->
+    console.log error
+
+sendFBRequest = sendFBRequestByProxy if location.host.match /nimble\.com/i
+
 freshBooksAPI =
   getClients: ->
     sendFBRequest
@@ -31,12 +57,7 @@ freshBooksAPI =
     sendFBRequest
       request:
         method: 'client.create'
-        client:
-          first_name: $t: 'Jane'
-          last_name: $t: 'Doe'
-          email: $t: 'janedoe@freshbooks.com'
-    .then (result) ->
-      console.log result
+        client: client
 
 module.exports =
   init: (_app, propertyName) ->
