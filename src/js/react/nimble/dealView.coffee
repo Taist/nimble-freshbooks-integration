@@ -1,6 +1,6 @@
 React = require 'react'
 
-{ div, button } = React.DOM
+{ div, button, a } = React.DOM
 
 NimbleDealViewPage = React.createFactory React.createClass
   getInitialState: ->
@@ -8,15 +8,18 @@ NimbleDealViewPage = React.createFactory React.createClass
 
   render: ->
     div { style: marginTop: 4 },
-      div {
-        tabIndex: 0
-        className: "nmbl-Button nmbl-Button-WebkitGecko #{@state.focusClass}"
-        onMouseEnter: => @setState focusClass: 'nmbl-Button-focus'
-        onMouseLeave: => @setState focusClass: ''
-        onClick: @props.onCreateEstimate
-      },
+      if @props.fbClientLink?
+        a { href: @props.fbClientLink, target: '_freshBooks' }, 'Go to linked client on FreshBooks'
+      else
         div {
-          className: 'nmbl-ButtonContent'
-        }, 'Create FreshBooks Client'
+          tabIndex: 0
+          className: "nmbl-Button nmbl-Button-WebkitGecko #{@state.focusClass}"
+          onMouseEnter: => @setState focusClass: 'nmbl-Button-focus'
+          onMouseLeave: => @setState focusClass: ''
+          onClick: @props.onCreateEstimate
+        },
+          div {
+            className: 'nmbl-ButtonContent'
+          }, 'Create FreshBooks Client'
 
 module.exports = NimbleDealViewPage

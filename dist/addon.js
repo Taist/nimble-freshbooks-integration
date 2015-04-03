@@ -23,10 +23,7 @@ app = {
   },
   actions: {
     setFreshBooksCreds: function(creds) {
-      return app.exapi.setUserData('freshBooksCreds', creds);
-    },
-    getFreshBooksCreds: function() {
-      return app.exapi.getUserData('freshBooksCreds');
+      return app.fbAPI.setCreds(creds);
     }
   }
 };
@@ -51,7 +48,7 @@ parseFBResponse = function(result) {
 };
 
 sendFBRequest = function(requestData) {
-  return app.actions.getFreshBooksCreds().then(function(creds) {
+  return freshBooksAPI.getCreds().then(function(creds) {
     return Q.when($.ajax({
       url: creds.url,
       headers: {
@@ -72,7 +69,7 @@ sendFBRequest = function(requestData) {
 };
 
 sendFBRequestByProxy = function(requestData) {
-  return app.actions.getFreshBooksCreds().then(function(creds) {
+  return freshBooksAPI.getCreds().then(function(creds) {
     var deferred, options;
     options = {
       headers: {
@@ -106,6 +103,22 @@ if (location.host.match(/nimble\.com/i)) {
 }
 
 freshBooksAPI = {
+  setCreds: function(creds) {
+    return app.exapi.setUserData('freshBooksCreds', creds);
+  },
+  getCreds: function() {
+    return app.exapi.getUserData('freshBooksCreds');
+  },
+  getClientLink: function(clientId) {
+    if (!clientId) {
+      return null;
+    }
+    return freshBooksAPI.getCreds().then(function(creds) {
+      var a;
+      (a = document.createElement('a')).href = creds.url;
+      return a.protocol + "//" + a.host + "/showUser?userid=" + clientId;
+    });
+  },
   getClients: function() {
     return sendFBRequest({
       request: {
@@ -156,7 +169,7 @@ module.exports = function() {
     action = function() {
       return app.actions.setFreshBooksCreds(getOnPageCreds());
     };
-    return app.actions.getFreshBooksCreds().then(function(creds) {
+    return app.fbAPI.getCreds().then(function(creds) {
       var React, isIntegrationEnabled, onPageCreds, reactPage;
       onPageCreds = getOnPageCreds();
       isIntegrationEnabled = onPageCreds.url === (creds != null ? creds.url : void 0) && onPageCreds.token === (creds != null ? creds.token : void 0);
@@ -285,7 +298,7 @@ _listenForRequestFinish = function(request) {
 };
 
 },{}],6:[function(require,module,exports){
-var app, extractNimbleAuthTokenFromRequest, onCreateEstimate, onDealView, proxy, routesByHashes, setRoutes;
+var app, dealViewContainer, extractNimbleAuthTokenFromRequest, onCreateEstimate, onDealView, proxy, renderOnDealView, routesByHashes, setRoutes;
 
 app = require('../app');
 
@@ -319,17 +332,36 @@ onCreateEstimate = function() {
   });
 };
 
-onDealView = function() {
-  return app.observer.waitElement('.DealView .profileInfoWrapper td.generalInfo', function(elem) {
-    var React, container, reactPage;
-    container = document.createElement('div');
-    elem.appendChild(container);
+dealViewContainer = null;
+
+renderOnDealView = function() {
+  return _app.exapi.getCompanyData(app.nimbleAPI.getDealIdFromUrl()).then(function(dealInfo) {
+    return app.fbAPI.getClientLink(dealInfo != null ? dealInfo.freshBooksClient : void 0);
+  }).then(function(fbClientLink) {
+    var React, reactData, reactPage;
+    reactData = {
+      onCreateEstimate: onCreateEstimate,
+      fbClientLink: fbClientLink
+    };
+    console.log(reactData);
     React = require('react');
     reactPage = require('../react/nimble/dealView');
-    return React.render(reactPage({
-      onCreateEstimate: onCreateEstimate
-    }), container);
+    return React.render(reactPage(reactData), dealViewContainer);
+  })["catch"](function(error) {
+    return console.log(error);
   });
+};
+
+onDealView = function() {
+  if (!dealViewContainer) {
+    return app.observer.waitElement('.DealView .profileInfoWrapper td.generalInfo', function(elem) {
+      dealViewContainer = document.createElement('div');
+      elem.appendChild(dealViewContainer);
+      return renderOnDealView();
+    });
+  } else {
+    return renderOnDealView();
+  }
 };
 
 routesByHashes = {
@@ -475,11 +507,11 @@ FreshBooksAPIEnablePage = React.createFactory(React.createClass({
 module.exports = FreshBooksAPIEnablePage;
 
 },{"react":187}],9:[function(require,module,exports){
-var NimbleDealViewPage, React, button, div, ref;
+var NimbleDealViewPage, React, a, button, div, ref;
 
 React = require('react');
 
-ref = React.DOM, div = ref.div, button = ref.button;
+ref = React.DOM, div = ref.div, button = ref.button, a = ref.a;
 
 NimbleDealViewPage = React.createFactory(React.createClass({
   getInitialState: function() {
@@ -492,7 +524,10 @@ NimbleDealViewPage = React.createFactory(React.createClass({
       style: {
         marginTop: 4
       }
-    }, div({
+    }, this.props.fbClientLink != null ? a({
+      href: this.props.fbClientLink,
+      target: '_freshBooks'
+    }, 'Go to linked client on FreshBooks') : div({
       tabIndex: 0,
       className: "nmbl-Button nmbl-Button-WebkitGecko " + this.state.focusClass,
       onMouseEnter: (function(_this) {

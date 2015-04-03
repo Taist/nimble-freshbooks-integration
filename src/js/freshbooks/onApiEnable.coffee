@@ -15,7 +15,7 @@ module.exports = ->
     action = ->
       app.actions.setFreshBooksCreds getOnPageCreds()
 
-    app.actions.getFreshBooksCreds().then (creds) ->
+    app.fbAPI.getCreds().then (creds) ->
       onPageCreds = getOnPageCreds()
       isIntegrationEnabled = ( onPageCreds.url is creds?.url and onPageCreds.token is creds?.token )
 

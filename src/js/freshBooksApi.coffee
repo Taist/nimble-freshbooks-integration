@@ -8,7 +8,7 @@ parseFBResponse = (result) ->
   json.response
 
 sendFBRequest = (requestData) ->
-  app.actions.getFreshBooksCreds()
+  freshBooksAPI.getCreds()
   .then (creds) ->
     Q.when $.ajax
       url: creds.url
@@ -23,7 +23,7 @@ sendFBRequest = (requestData) ->
     console.log err
 
 sendFBRequestByProxy = (requestData) ->
-  app.actions.getFreshBooksCreds()
+  freshBooksAPI.getCreds()
   .then (creds) ->
     options =
       headers:
@@ -49,6 +49,20 @@ sendFBRequestByProxy = (requestData) ->
 sendFBRequest = sendFBRequestByProxy if location.host.match /nimble\.com/i
 
 freshBooksAPI =
+  setCreds: (creds) ->
+    app.exapi.setUserData 'freshBooksCreds', creds
+
+  getCreds: ->
+    app.exapi.getUserData 'freshBooksCreds'
+
+  getClientLink: (clientId) ->
+    unless clientId
+      return null
+    freshBooksAPI.getCreds()
+    .then (creds) ->
+      ( a = document.createElement 'a' ).href = creds.url
+      "#{a.protocol}//#{a.host}/showUser?userid=#{clientId}"
+
   getClients: ->
     sendFBRequest
       request:

@@ -18,14 +18,32 @@ onCreateEstimate = ->
   .catch (error) ->
     console.log error
 
-onDealView = ->
-  app.observer.waitElement '.DealView .profileInfoWrapper td.generalInfo', (elem) ->
-    container = document.createElement 'div'
-    elem.appendChild container
+dealViewContainer = null
+
+renderOnDealView = ->
+  _app.exapi.getCompanyData app.nimbleAPI.getDealIdFromUrl()
+  .then (dealInfo) ->
+    app.fbAPI.getClientLink dealInfo?.freshBooksClient
+  .then (fbClientLink) ->
+
+    reactData = { onCreateEstimate, fbClientLink }
+    console.log reactData
 
     React = require 'react'
     reactPage = require '../react/nimble/dealView'
-    React.render reactPage( { onCreateEstimate } ), container
+    React.render reactPage( reactData ), dealViewContainer
+  .catch (error) ->
+    console.log error
+
+onDealView = ->
+  unless dealViewContainer
+    app.observer.waitElement '.DealView .profileInfoWrapper td.generalInfo', (elem) ->
+      dealViewContainer = document.createElement 'div'
+      elem.appendChild dealViewContainer
+      renderOnDealView()
+  else
+    renderOnDealView()
+
 
 routesByHashes =
   '^app/deals/view': onDealView

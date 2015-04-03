@@ -27,9 +27,6 @@ app =
 
   actions:
     setFreshBooksCreds: (creds) ->
-      app.exapi.setUserData 'freshBooksCreds', creds
-
-    getFreshBooksCreds: ->
-      app.exapi.getUserData 'freshBooksCreds'
+      app.fbAPI.setCreds creds
 
 module.exports = app
