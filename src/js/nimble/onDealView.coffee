@@ -11,22 +11,36 @@ onCreateEstimate = ->
     unless contact?.fields?.email?
       return Q.reject 'CONTACT_NOT_FOUND'
 
-    currentContact = contact
-    client =
-      first_name: $t: contact.fields['first name']?[0]?.value
-      last_name: $t: contact.fields['last name']?[0]?.value
-      organization: $t: contact.fields['parent company']?[0]?.value or contact.fields['company name']?[0]?.value
-      email: $t: contact.fields['email']?[0]?.value
+    app.exapi.getCompanyData contact.id
+    .then (linkedClient) ->
+      unless linkedClient
+        console.log 'creating new freshBooks user'
+        currentContact = contact
+        client =
+          first_name: $t: contact.fields['first name']?[0]?.value
+          last_name: $t: contact.fields['last name']?[0]?.value
+          organization: $t: contact.fields['parent company']?[0]?.value or contact.fields['company name']?[0]?.value
+          email: $t: contact.fields['email']?[0]?.value
 
-    app.fbAPI.createClient client
-  .then (response) ->
-    if response.status = 'ok'
-      Q.all [
-        app.exapi.setCompanyData app.nimbleAPI.getDealIdFromUrl(), { freshBooksClient: response.client_id.$t }
-        app.exapi.setCompanyData currentContact.id, { freshBooksClient: response.client_id.$t }
-      ]
-    else
-      Q.reject response
+        app.fbAPI.createClient client
+        .then (response) ->
+
+          if response.status = 'ok'
+            clientId = response.client_id.$t
+            Q.all [
+              app.exapi.setCompanyData app.nimbleAPI.getDealIdFromUrl(), { freshBooksClient: clientId }
+              app.exapi.setCompanyData currentContact.id, { freshBooksClient: clientId }
+            ]
+            .then ->
+              Q.resolve clientId
+          else
+            Q.reject response
+      else
+        console.log 'working with existed freshBooks user'
+        Q.resolve linkedClient.freshBooksClient
+
+  .then (fbClientId) ->
+    console.log 'fbClientId is ' + fbClientId
   .then () ->
     renderOnDealView()
   .catch (error) ->

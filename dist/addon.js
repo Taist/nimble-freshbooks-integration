@@ -318,39 +318,54 @@ onCreateEstimate = function() {
   var currentContact;
   currentContact = null;
   return app.nimbleAPI.getDealContact().then(function(contact) {
-    var client, ref, ref1, ref10, ref2, ref3, ref4, ref5, ref6, ref7, ref8, ref9;
+    var ref;
     console.log('nimble contact is ', contact);
     if ((contact != null ? (ref = contact.fields) != null ? ref.email : void 0 : void 0) == null) {
       return Q.reject('CONTACT_NOT_FOUND');
     }
-    currentContact = contact;
-    client = {
-      first_name: {
-        $t: (ref1 = contact.fields['first name']) != null ? (ref2 = ref1[0]) != null ? ref2.value : void 0 : void 0
-      },
-      last_name: {
-        $t: (ref3 = contact.fields['last name']) != null ? (ref4 = ref3[0]) != null ? ref4.value : void 0 : void 0
-      },
-      organization: {
-        $t: ((ref5 = contact.fields['parent company']) != null ? (ref6 = ref5[0]) != null ? ref6.value : void 0 : void 0) || ((ref7 = contact.fields['company name']) != null ? (ref8 = ref7[0]) != null ? ref8.value : void 0 : void 0)
-      },
-      email: {
-        $t: (ref9 = contact.fields['email']) != null ? (ref10 = ref9[0]) != null ? ref10.value : void 0 : void 0
+    return app.exapi.getCompanyData(contact.id).then(function(linkedClient) {
+      var client, ref1, ref10, ref2, ref3, ref4, ref5, ref6, ref7, ref8, ref9;
+      if (!linkedClient) {
+        console.log('creating new freshBooks user');
+        currentContact = contact;
+        client = {
+          first_name: {
+            $t: (ref1 = contact.fields['first name']) != null ? (ref2 = ref1[0]) != null ? ref2.value : void 0 : void 0
+          },
+          last_name: {
+            $t: (ref3 = contact.fields['last name']) != null ? (ref4 = ref3[0]) != null ? ref4.value : void 0 : void 0
+          },
+          organization: {
+            $t: ((ref5 = contact.fields['parent company']) != null ? (ref6 = ref5[0]) != null ? ref6.value : void 0 : void 0) || ((ref7 = contact.fields['company name']) != null ? (ref8 = ref7[0]) != null ? ref8.value : void 0 : void 0)
+          },
+          email: {
+            $t: (ref9 = contact.fields['email']) != null ? (ref10 = ref9[0]) != null ? ref10.value : void 0 : void 0
+          }
+        };
+        return app.fbAPI.createClient(client).then(function(response) {
+          var clientId;
+          if (response.status = 'ok') {
+            clientId = response.client_id.$t;
+            return Q.all([
+              app.exapi.setCompanyData(app.nimbleAPI.getDealIdFromUrl(), {
+                freshBooksClient: clientId
+              }), app.exapi.setCompanyData(currentContact.id, {
+                freshBooksClient: clientId
+              })
+            ]).then(function() {
+              return Q.resolve(clientId);
+            });
+          } else {
+            return Q.reject(response);
+          }
+        });
+      } else {
+        console.log('working with existed freshBooks user');
+        return Q.resolve(linkedClient.freshBooksClient);
       }
-    };
-    return app.fbAPI.createClient(client);
-  }).then(function(response) {
-    if (response.status = 'ok') {
-      return Q.all([
-        app.exapi.setCompanyData(app.nimbleAPI.getDealIdFromUrl(), {
-          freshBooksClient: response.client_id.$t
-        }), app.exapi.setCompanyData(currentContact.id, {
-          freshBooksClient: response.client_id.$t
-        })
-      ]);
-    } else {
-      return Q.reject(response);
-    }
+    });
+  }).then(function(fbClientId) {
+    return console.log('fbClientId is ' + fbClientId);
   }).then(function() {
     return renderOnDealView();
   })["catch"](function(error) {
@@ -603,7 +618,14 @@ NimbleDealViewPage = React.createFactory(React.createClass({
     })) : void 0), div({}, this.props.fbClientLink != null ? a({
       href: this.props.fbClientLink,
       target: '_freshBooks'
-    }, 'Go to linked client on FreshBooks') : div({
+    }, 'Go to linked client on FreshBooks') : void 0), div({
+      style: {
+        marginTop: 4
+      }
+    }, this.props.fbEstimateLink != null ? a({
+      href: this.props.fbEstimateLink,
+      target: '_freshBooks'
+    }, 'Go to linked estimate on FreshBooks') : div({
       tabIndex: 0,
       className: "nmbl-Button nmbl-Button-WebkitGecko " + this.state.focusClass,
       onMouseEnter: (function(_this) {
@@ -623,7 +645,7 @@ NimbleDealViewPage = React.createFactory(React.createClass({
       onClick: this.props.onCreateEstimate
     }, div({
       className: 'nmbl-ButtonContent'
-    }, 'Create FreshBooks Client'))));
+    }, 'Create FreshBooks Estimate'))));
   }
 }));
 

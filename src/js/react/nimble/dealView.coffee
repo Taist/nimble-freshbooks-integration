@@ -35,6 +35,9 @@ NimbleDealViewPage = React.createFactory React.createClass
       div {},
         if @props.fbClientLink?
           a { href: @props.fbClientLink, target: '_freshBooks' }, 'Go to linked client on FreshBooks'
+      div { style: marginTop: 4},
+        if @props.fbEstimateLink?
+          a { href: @props.fbEstimateLink, target: '_freshBooks' }, 'Go to linked estimate on FreshBooks'
         else
           div {
             tabIndex: 0
@@ -45,6 +48,6 @@ NimbleDealViewPage = React.createFactory React.createClass
           },
             div {
               className: 'nmbl-ButtonContent'
-            }, 'Create FreshBooks Client'
+            }, 'Create FreshBooks Estimate'
 
 module.exports = NimbleDealViewPage
