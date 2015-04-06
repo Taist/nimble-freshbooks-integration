@@ -6,7 +6,7 @@ Q = require('q');
 appData = {};
 
 appErrors = {
-  CONTACT_NOT_FOUND: 'You need to select Person before estimate creation'
+  CONTACT_NOT_FOUND: 'You have to select Contact with correct email before create estimate'
 };
 
 app = {
@@ -318,7 +318,7 @@ onCreateEstimate = function() {
   var currentContact;
   currentContact = null;
   return app.nimbleAPI.getDealContact().then(function(contact) {
-    var client, ref, ref1, ref2, ref3, ref4, ref5, ref6, ref7, ref8;
+    var client, ref, ref1, ref10, ref2, ref3, ref4, ref5, ref6, ref7, ref8, ref9;
     console.log('nimble contact is ', contact);
     if ((contact != null ? (ref = contact.fields) != null ? ref.email : void 0 : void 0) == null) {
       return Q.reject('CONTACT_NOT_FOUND');
@@ -332,10 +332,10 @@ onCreateEstimate = function() {
         $t: (ref3 = contact.fields['last name']) != null ? (ref4 = ref3[0]) != null ? ref4.value : void 0 : void 0
       },
       organization: {
-        $t: (ref5 = contact.fields['parent company']) != null ? (ref6 = ref5[0]) != null ? ref6.value : void 0 : void 0
+        $t: ((ref5 = contact.fields['parent company']) != null ? (ref6 = ref5[0]) != null ? ref6.value : void 0 : void 0) || ((ref7 = contact.fields['company name']) != null ? (ref8 = ref7[0]) != null ? ref8.value : void 0 : void 0)
       },
       email: {
-        $t: (ref7 = contact.fields['email']) != null ? (ref8 = ref7[0]) != null ? ref8.value : void 0 : void 0
+        $t: (ref9 = contact.fields['email']) != null ? (ref10 = ref9[0]) != null ? ref10.value : void 0 : void 0
       }
     };
     return app.fbAPI.createClient(client);

@@ -5,7 +5,7 @@ appData = {
 }
 
 appErrors =
-  CONTACT_NOT_FOUND: 'You need to select Person before estimate creation'
+  CONTACT_NOT_FOUND: 'You have to select Contact with correct email before create estimate'
 
 app =
   api: null

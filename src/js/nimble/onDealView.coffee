@@ -15,7 +15,7 @@ onCreateEstimate = ->
     client =
       first_name: $t: contact.fields['first name']?[0]?.value
       last_name: $t: contact.fields['last name']?[0]?.value
-      organization: $t: contact.fields['parent company']?[0]?.value
+      organization: $t: contact.fields['parent company']?[0]?.value or contact.fields['company name']?[0]?.value
       email: $t: contact.fields['email']?[0]?.value
 
     app.fbAPI.createClient client
