@@ -93,6 +93,10 @@ freshBooksAPI =
         estimate: estimate
 
   getEstimate: (estimateId) ->
+    sendFBRequest
+      request:
+        method: 'estimate.get'
+        estimate_id: $t: estimateId
 
 module.exports =
   init: (_app, propertyName) ->

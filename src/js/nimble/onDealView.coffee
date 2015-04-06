@@ -26,7 +26,7 @@ onCreateEstimate = ->
         app.fbAPI.createClient client
         .then (response) ->
 
-          if response.status = 'ok'
+          if response.status is 'ok'
             clientId = response.client_id.$t
             app.exapi.setCompanyData currentNimbleContact.id, { freshBooksClientId: clientId }
             .then ->
@@ -45,7 +45,7 @@ onCreateEstimate = ->
 
   .then (response) ->
 
-    if response.status = 'ok'
+    if response.status is 'ok'
       dealId = app.nimbleAPI.getDealIdFromUrl()
       console.log dealId, response
 
@@ -64,6 +64,7 @@ onCreateEstimate = ->
     app.actions.onNimbleError error
 
 dealViewContainer = null
+dealViewEstimateTable = null
 
 renderOnDealView = (alertMessage = null) ->
   app.nimbleAPI.getDealContact()
@@ -78,17 +79,30 @@ renderOnDealView = (alertMessage = null) ->
 
   .spread (contactInfo, dealInfo) ->
 
+    app.fbAPI.getEstimate dealInfo?.freshBooksEstimateId
+    .then (response) ->
+      console.log response.estimate
 
+      fbClientLink = app.fbAPI.getClientLink contactInfo?.freshBooksClientId
+      fbEstimateLink = app.fbAPI.getEstimateLink dealInfo?.freshBooksEstimateId
 
-    fbClientLink = app.fbAPI.getClientLink contactInfo?.freshBooksClientId
-    fbEstimateLink = app.fbAPI.getEstimateLink dealInfo?.freshBooksEstimateId
+      reactData = { onCreateEstimate, fbClientLink, fbEstimateLink, alertMessage }
+      console.log 'renderOnDealView', reactData
 
-    reactData = { onCreateEstimate, fbClientLink, fbEstimateLink, alertMessage }
-    console.log 'renderOnDealView', reactData
+      React = require 'react'
+      reactPage = require '../react/nimble/dealView'
+      React.render reactPage( reactData ), dealViewContainer
 
-    React = require 'react'
-    reactPage = require '../react/nimble/dealView'
-    React.render reactPage( reactData ), dealViewContainer
+      estimateTableData = {
+        amount: response.estimate?.amount.$t
+        currency: response.estimate?.currency_code.$t
+        time: (response.estimate?.lines?.line or []).filter (line) ->
+          line?.name?.$t? and line?.type?.$t is 'Time'
+        item: (response.estimate?.lines?.line or []).filter (line) ->
+          line?.name?.$t? and line?.type?.$t isnt 'Time'
+      }
+      reactComponent = require '../react/nimble/dealViewEstimateTable'
+      React.render reactComponent( estimateTableData ), dealViewEstimateTable
 
   .catch (error) ->
     console.log error
@@ -96,9 +110,14 @@ renderOnDealView = (alertMessage = null) ->
 
 module.exports = (alertMessage) ->
   unless dealViewContainer
-    app.observer.waitElement '.DealView .profileInfoWrapper td.generalInfo', (elem) ->
+    app.observer.waitElement '.DealView .profileInfoWrapper', (elem) ->
+
       dealViewContainer = document.createElement 'div'
-      elem.appendChild dealViewContainer
+      elem.querySelector('td.generalInfo').appendChild dealViewContainer
+
+      dealViewEstimateTable = document.createElement 'div'
+      elem.insertBefore dealViewEstimateTable, elem.querySelector('.fullInfoContainer')
+
       renderOnDealView alertMessage
   else
     renderOnDealView alertMessage
