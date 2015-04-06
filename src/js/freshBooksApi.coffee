@@ -44,6 +44,7 @@ sendFBRequestByProxy = (requestData) ->
   .then (result) ->
     parseFBResponse result
   .catch (error) ->
+    app.actions.onNimbleError 'FB_PROXY_ERROR'
     console.log error
 
 sendFBRequest = sendFBRequestByProxy if location.host.match /nimble\.com/i

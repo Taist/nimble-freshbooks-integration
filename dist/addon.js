@@ -6,7 +6,8 @@ Q = require('q');
 appData = {};
 
 appErrors = {
-  CONTACT_NOT_FOUND: 'You have to select Contact with correct email before create estimate'
+  CONTACT_NOT_FOUND: 'Please fill \'Person\' field of this deal before creating an estimate',
+  FB_PROXY_ERROR: 'Can\'t connect to FreshBooks API. Please switch on integration on FreshBooks'
 };
 
 app = {
@@ -104,6 +105,7 @@ sendFBRequestByProxy = function(requestData) {
   }).then(function(result) {
     return parseFBResponse(result);
   })["catch"](function(error) {
+    app.actions.onNimbleError('FB_PROXY_ERROR');
     return console.log(error);
   });
 };
@@ -344,7 +346,7 @@ onCreateEstimate = function() {
       return Q.reject('CONTACT_NOT_FOUND');
     }
     return app.exapi.getCompanyData(contact.id).then(function(linkedClient) {
-      var client, ref1, ref10, ref2, ref3, ref4, ref5, ref6, ref7, ref8, ref9;
+      var client, ref1, ref2, ref3, ref4, ref5, ref6, ref7, ref8;
       if (!linkedClient) {
         console.log('creating new freshBooks user');
         currentNimbleContact = contact;
@@ -356,10 +358,10 @@ onCreateEstimate = function() {
             $t: (ref3 = contact.fields['last name']) != null ? (ref4 = ref3[0]) != null ? ref4.value : void 0 : void 0
           },
           organization: {
-            $t: ((ref5 = contact.fields['parent company']) != null ? (ref6 = ref5[0]) != null ? ref6.value : void 0 : void 0) || ((ref7 = contact.fields['company name']) != null ? (ref8 = ref7[0]) != null ? ref8.value : void 0 : void 0)
+            $t: (ref5 = contact.fields['parent company']) != null ? (ref6 = ref5[0]) != null ? ref6.value : void 0 : void 0
           },
           email: {
-            $t: (ref9 = contact.fields['email']) != null ? (ref10 = ref9[0]) != null ? ref10.value : void 0 : void 0
+            $t: (ref7 = contact.fields['email']) != null ? (ref8 = ref7[0]) != null ? ref8.value : void 0 : void 0
           }
         };
         return app.fbAPI.createClient(client).then(function(response) {
@@ -647,12 +649,11 @@ NimbleDealViewPage = React.createFactory(React.createClass({
       }
     });
   },
+  onCreateEstimate: function(event) {
+    return this.props.onCreateEstimate();
+  },
   render: function() {
-    return div({
-      style: {
-        marginTop: 4
-      }
-    }, div({}, this.state.alertMessage != null ? div({
+    return div({}, div({}, this.state.alertMessage != null ? div({
       className: 'nmbl-StatusPanel nmbl-StatusPanel-warning',
       style: {
         top: 60,
@@ -664,37 +665,16 @@ NimbleDealViewPage = React.createFactory(React.createClass({
     }, this.state.alertMessage), div({
       className: 'closeOrange',
       onClick: this.onCloseAlert
-    })) : void 0), div({}, this.props.fbClientLink != null ? a({
-      href: this.props.fbClientLink,
-      target: '_freshBooks'
-    }, 'Go to linked client on FreshBooks') : void 0), div({
+    })) : void 0), div({
       style: {
         marginTop: 4
       }
     }, this.props.fbEstimateLink != null ? a({
       href: this.props.fbEstimateLink,
       target: '_freshBooks'
-    }, 'Go to linked estimate on FreshBooks') : div({
-      tabIndex: 0,
-      className: "nmbl-Button nmbl-Button-WebkitGecko " + this.state.focusClass,
-      onMouseEnter: (function(_this) {
-        return function() {
-          return _this.setState({
-            focusClass: 'nmbl-Button-focus'
-          });
-        };
-      })(this),
-      onMouseLeave: (function(_this) {
-        return function() {
-          return _this.setState({
-            focusClass: ''
-          });
-        };
-      })(this),
-      onClick: this.props.onCreateEstimate
-    }, div({
-      className: 'nmbl-ButtonContent'
-    }, 'Create FreshBooks Estimate'))));
+    }, 'Estimate') : a({
+      onClick: this.onCreateEstimate
+    }, 'Create estimate')));
   }
 }));
 

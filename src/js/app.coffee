@@ -5,7 +5,8 @@ appData = {
 }
 
 appErrors =
-  CONTACT_NOT_FOUND: 'You have to select Contact with correct email before create estimate'
+  CONTACT_NOT_FOUND: 'Please fill \'Person\' field of this deal before creating an estimate'
+  FB_PROXY_ERROR: 'Can\'t connect to FreshBooks API. Please switch on integration on FreshBooks'
 
 app =
   api: null

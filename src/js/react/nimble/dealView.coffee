@@ -19,8 +19,11 @@ NimbleDealViewPage = React.createFactory React.createClass
           @onCloseAlert()
         , @alertTimeout
 
+  onCreateEstimate: (event) ->
+    @props.onCreateEstimate()
+
   render: ->
-    div { style: marginTop: 4 },
+    div {},
       div {},
         if @state.alertMessage?
           div {
@@ -32,22 +35,12 @@ NimbleDealViewPage = React.createFactory React.createClass
           },
             div { className: 'gwt-Label' }, @state.alertMessage
             div { className: 'closeOrange', onClick: @onCloseAlert }
-      div {},
-        if @props.fbClientLink?
-          a { href: @props.fbClientLink, target: '_freshBooks' }, 'Go to linked client on FreshBooks'
       div { style: marginTop: 4},
         if @props.fbEstimateLink?
-          a { href: @props.fbEstimateLink, target: '_freshBooks' }, 'Go to linked estimate on FreshBooks'
+          a { href: @props.fbEstimateLink, target: '_freshBooks' }, 'Estimate'
         else
-          div {
-            tabIndex: 0
-            className: "nmbl-Button nmbl-Button-WebkitGecko #{@state.focusClass}"
-            onMouseEnter: => @setState focusClass: 'nmbl-Button-focus'
-            onMouseLeave: => @setState focusClass: ''
-            onClick: @props.onCreateEstimate
-          },
-            div {
-              className: 'nmbl-ButtonContent'
-            }, 'Create FreshBooks Estimate'
+          a {
+            onClick: @onCreateEstimate
+          }, 'Create estimate'
 
 module.exports = NimbleDealViewPage
