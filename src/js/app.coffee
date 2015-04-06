@@ -4,6 +4,9 @@ appData = {
 
 }
 
+appErrors =
+  CONTACT_NOT_FOUND: 'You need to select Person before estimate creation'
+
 app =
   api: null
   exapi: {}
@@ -26,6 +29,11 @@ app =
     app.exapi.getCompanyData = Q.nbind api.companyData.get, api.companyData
 
   actions:
+    onNimbleError: (messageCode) ->
+      console.log 'onNimbleError', messageCode
+      if appErrors[messageCode]?
+        require('./nimble/onDealView') appErrors[messageCode]
+
     setFreshBooksCreds: (creds) ->
       app.fbAPI.setCreds creds
 
