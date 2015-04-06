@@ -6,7 +6,7 @@ appData = {
 
 appErrors =
   CONTACT_NOT_FOUND: 'Please fill \'Person\' field of this deal before creating an estimate'
-  FB_PROXY_ERROR: 'Can\'t connect to FreshBooks API. Please switch on integration on FreshBooks'
+  FB_PROXY_ERROR: "Can't connect to Freshbooks. Please enable its integration with Nimble (My account -> Freshbooks API)"
 
 app =
   api: null
