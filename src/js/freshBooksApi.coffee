@@ -92,6 +92,8 @@ freshBooksAPI =
         method: 'estimate.create'
         estimate: estimate
 
+  getEstimate: (estimateId) ->
+
 module.exports =
   init: (_app, propertyName) ->
     app = _app

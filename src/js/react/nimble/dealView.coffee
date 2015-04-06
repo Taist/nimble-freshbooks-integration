@@ -40,6 +40,7 @@ NimbleDealViewPage = React.createFactory React.createClass
           a { href: @props.fbEstimateLink, target: '_freshBooks' }, 'Estimate'
         else
           a {
+            href: 'javascript:void(0)'
             onClick: @onCreateEstimate
           }, 'Create estimate'
 

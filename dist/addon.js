@@ -166,7 +166,8 @@ freshBooksAPI = {
         estimate: estimate
       }
     });
-  }
+  },
+  getEstimate: function(estimateId) {}
 };
 
 module.exports = {
@@ -342,7 +343,7 @@ onCreateEstimate = function() {
   return app.nimbleAPI.getDealContact().then(function(contact) {
     var ref;
     console.log('nimble contact is ', contact);
-    if ((contact != null ? (ref = contact.fields) != null ? ref.email : void 0 : void 0) == null) {
+    if (!(((contact != null ? (ref = contact.fields) != null ? ref.email : void 0 : void 0) != null) && (contact != null ? contact.record_type : void 0) === 'person')) {
       return Q.reject('CONTACT_NOT_FOUND');
     }
     return app.exapi.getCompanyData(contact.id).then(function(linkedClient) {
@@ -673,6 +674,7 @@ NimbleDealViewPage = React.createFactory(React.createClass({
       href: this.props.fbEstimateLink,
       target: '_freshBooks'
     }, 'Estimate') : a({
+      href: 'javascript:void(0)',
       onClick: this.onCreateEstimate
     }, 'Create estimate')));
   }

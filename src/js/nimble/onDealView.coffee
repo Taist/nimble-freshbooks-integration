@@ -9,7 +9,7 @@ onCreateEstimate = ->
   app.nimbleAPI.getDealContact()
   .then (contact) ->
     console.log 'nimble contact is ', contact
-    unless contact?.fields?.email?
+    unless contact?.fields?.email? and contact?.record_type is 'person'
       return Q.reject 'CONTACT_NOT_FOUND'
 
     app.exapi.getCompanyData contact.id
@@ -77,6 +77,9 @@ renderOnDealView = (alertMessage = null) ->
       Q.resolve [null, null]
 
   .spread (contactInfo, dealInfo) ->
+
+
+
     fbClientLink = app.fbAPI.getClientLink contactInfo?.freshBooksClientId
     fbEstimateLink = app.fbAPI.getEstimateLink dealInfo?.freshBooksEstimateId
 
