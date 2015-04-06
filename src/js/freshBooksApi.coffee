@@ -48,20 +48,29 @@ sendFBRequestByProxy = (requestData) ->
 
 sendFBRequest = sendFBRequestByProxy if location.host.match /nimble\.com/i
 
+fbAPIServer = null
+
 freshBooksAPI =
   setCreds: (creds) ->
     app.exapi.setUserData 'freshBooksCreds', creds
 
   getCreds: ->
     app.exapi.getUserData 'freshBooksCreds'
+    .then (creds) ->
+      unless fbAPIServer
+        ( a = document.createElement 'a' ).href = creds.url
+        fbAPIServer = "#{a.protocol}//#{a.host}"
+      creds
 
   getClientLink: (clientId) ->
     unless clientId
       return null
-    freshBooksAPI.getCreds()
-    .then (creds) ->
-      ( a = document.createElement 'a' ).href = creds.url
-      "#{a.protocol}//#{a.host}/showUser?userid=#{clientId}"
+    "#{fbAPIServer}/showUser?userid=#{clientId}"
+
+  getEstimateLink: (estimateId) ->
+    unless estimateId
+      return null
+    "#{fbAPIServer}/showEstimate?estimateid=#{estimateId}"
 
   getClients: ->
     sendFBRequest

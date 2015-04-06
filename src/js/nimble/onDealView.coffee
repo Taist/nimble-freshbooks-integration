@@ -66,24 +66,27 @@ onCreateEstimate = ->
 dealViewContainer = null
 
 renderOnDealView = (alertMessage = null) ->
-  # app.exapi.getCompanyData app.nimbleAPI.getDealIdFromUrl()
-  # .then (dealInfo) ->
   app.nimbleAPI.getDealContact()
   .then (contact) ->
     if contact
-      app.exapi.getCompanyData contact.id
+      Q.all [
+        app.exapi.getCompanyData contact.id
+        app.exapi.getCompanyData app.nimbleAPI.getDealIdFromUrl()
+      ]
     else
-      Q.resolve null
-  .then (dealInfo) ->
-    app.fbAPI.getClientLink dealInfo?.freshBooksClientId
-  .then (fbClientLink) ->
+      Q.resolve [null, null]
 
-    reactData = { onCreateEstimate, fbClientLink, alertMessage }
+  .spread (contactInfo, dealInfo) ->
+    fbClientLink = app.fbAPI.getClientLink contactInfo?.freshBooksClientId
+    fbEstimateLink = app.fbAPI.getEstimateLink dealInfo?.freshBooksEstimateId
+
+    reactData = { onCreateEstimate, fbClientLink, fbEstimateLink, alertMessage }
     console.log 'renderOnDealView', reactData
 
     React = require 'react'
     reactPage = require '../react/nimble/dealView'
     React.render reactPage( reactData ), dealViewContainer
+
   .catch (error) ->
     console.log error
     app.actions.onNimbleError error

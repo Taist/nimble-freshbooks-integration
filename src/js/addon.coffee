@@ -14,7 +14,9 @@ addonEntry =
       require('./freshbooks/onApiEnable')()
 
     if location.host.match /nimble\.com/i
-      require('./nimble/onNimble')()
+      app.fbAPI.getCreds()
+      .then ->
+        require('./nimble/onNimble')()
 
     console.log "STARTED ON #{location.host}"
 

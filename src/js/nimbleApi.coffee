@@ -3,11 +3,23 @@ app = null
 Q = require 'q'
 
 sendNimbleRequest = (path) ->
-  Q.when $.ajax
-    url: path
-    dataType: "json"
-    headers:
-      Authorization: "Nimble token=\"#{app.options.nimbleToken}\""
+  if app.options.nimbleToken
+    Q.when $.ajax
+      url: path
+      dataType: "json"
+      headers:
+        Authorization: "Nimble token=\"#{app.options.nimbleToken}\""
+  else
+    console.log 'Nimble token is null'
+    deferred = Q.defer()
+
+    setTimeout ->
+      sendNimbleRequest path
+      .then (response) ->
+        deferred.resolve response
+    , 500
+
+    deferred.promise
 
 nimbleAPI =
   getDealIdFromUrl: ->

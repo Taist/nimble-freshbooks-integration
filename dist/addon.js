@@ -18,12 +18,12 @@ app = {
   },
   init: function(api) {
     app.api = api;
-    require('./freshBooksApi').init(app, 'fbAPI');
-    require('./nimbleApi').init(app, 'nimbleAPI');
     app.exapi.setUserData = Q.nbind(api.userData.set, api.userData);
     app.exapi.getUserData = Q.nbind(api.userData.get, api.userData);
     app.exapi.setCompanyData = Q.nbind(api.companyData.set, api.companyData);
-    return app.exapi.getCompanyData = Q.nbind(api.companyData.get, api.companyData);
+    app.exapi.getCompanyData = Q.nbind(api.companyData.get, api.companyData);
+    require('./freshBooksApi').init(app, 'fbAPI');
+    return require('./nimbleApi').init(app, 'nimbleAPI');
   },
   actions: {
     onNimbleError: function(messageCode) {
@@ -41,7 +41,7 @@ app = {
 module.exports = app;
 
 },{"./freshBooksApi":2,"./nimble/onDealView":6,"./nimbleApi":8,"q":33}],2:[function(require,module,exports){
-var Q, XMLMapping, app, freshBooksAPI, parseFBResponse, sendFBRequest, sendFBRequestByProxy;
+var Q, XMLMapping, app, fbAPIServer, freshBooksAPI, parseFBResponse, sendFBRequest, sendFBRequestByProxy;
 
 app = null;
 
@@ -112,22 +112,33 @@ if (location.host.match(/nimble\.com/i)) {
   sendFBRequest = sendFBRequestByProxy;
 }
 
+fbAPIServer = null;
+
 freshBooksAPI = {
   setCreds: function(creds) {
     return app.exapi.setUserData('freshBooksCreds', creds);
   },
   getCreds: function() {
-    return app.exapi.getUserData('freshBooksCreds');
+    return app.exapi.getUserData('freshBooksCreds').then(function(creds) {
+      var a;
+      if (!fbAPIServer) {
+        (a = document.createElement('a')).href = creds.url;
+        fbAPIServer = a.protocol + "//" + a.host;
+      }
+      return creds;
+    });
   },
   getClientLink: function(clientId) {
     if (!clientId) {
       return null;
     }
-    return freshBooksAPI.getCreds().then(function(creds) {
-      var a;
-      (a = document.createElement('a')).href = creds.url;
-      return a.protocol + "//" + a.host + "/showUser?userid=" + clientId;
-    });
+    return fbAPIServer + "/showUser?userid=" + clientId;
+  },
+  getEstimateLink: function(estimateId) {
+    if (!estimateId) {
+      return null;
+    }
+    return fbAPIServer + "/showEstimate?estimateid=" + estimateId;
   },
   getClients: function() {
     return sendFBRequest({
@@ -406,17 +417,18 @@ renderOnDealView = function(alertMessage) {
   }
   return app.nimbleAPI.getDealContact().then(function(contact) {
     if (contact) {
-      return app.exapi.getCompanyData(contact.id);
+      return Q.all([app.exapi.getCompanyData(contact.id), app.exapi.getCompanyData(app.nimbleAPI.getDealIdFromUrl())]);
     } else {
-      return Q.resolve(null);
+      return Q.resolve([null, null]);
     }
-  }).then(function(dealInfo) {
-    return app.fbAPI.getClientLink(dealInfo != null ? dealInfo.freshBooksClientId : void 0);
-  }).then(function(fbClientLink) {
-    var React, reactData, reactPage;
+  }).spread(function(contactInfo, dealInfo) {
+    var React, fbClientLink, fbEstimateLink, reactData, reactPage;
+    fbClientLink = app.fbAPI.getClientLink(contactInfo != null ? contactInfo.freshBooksClientId : void 0);
+    fbEstimateLink = app.fbAPI.getEstimateLink(dealInfo != null ? dealInfo.freshBooksEstimateId : void 0);
     reactData = {
       onCreateEstimate: onCreateEstimate,
       fbClientLink: fbClientLink,
+      fbEstimateLink: fbEstimateLink,
       alertMessage: alertMessage
     };
     console.log('renderOnDealView', reactData);
@@ -492,13 +504,25 @@ app = null;
 Q = require('q');
 
 sendNimbleRequest = function(path) {
-  return Q.when($.ajax({
-    url: path,
-    dataType: "json",
-    headers: {
-      Authorization: "Nimble token=\"" + app.options.nimbleToken + "\""
-    }
-  }));
+  var deferred;
+  if (app.options.nimbleToken) {
+    return Q.when($.ajax({
+      url: path,
+      dataType: "json",
+      headers: {
+        Authorization: "Nimble token=\"" + app.options.nimbleToken + "\""
+      }
+    }));
+  } else {
+    console.log('Nimble token is null');
+    deferred = Q.defer();
+    setTimeout(function() {
+      return sendNimbleRequest(path).then(function(response) {
+        return deferred.resolve(response);
+      });
+    }, 500);
+    return deferred.promise;
+  }
 };
 
 nimbleAPI = {
@@ -28364,7 +28388,9 @@ addonEntry = {
       require('./freshbooks/onApiEnable')();
     }
     if (location.host.match(/nimble\.com/i)) {
-      require('./nimble/onNimble')();
+      app.fbAPI.getCreds().then(function() {
+        return require('./nimble/onNimble')();
+      });
     }
     return console.log("STARTED ON " + location.host);
   }
