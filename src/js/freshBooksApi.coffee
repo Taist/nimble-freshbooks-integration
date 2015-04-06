@@ -76,6 +76,12 @@ freshBooksAPI =
         method: 'client.create'
         client: client
 
+  createEstimate: (estimate) ->
+    sendFBRequest
+      request:
+        method: 'estimate.create'
+        estimate: estimate
+
 module.exports =
   init: (_app, propertyName) ->
     app = _app

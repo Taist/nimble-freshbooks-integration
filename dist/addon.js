@@ -145,6 +145,14 @@ freshBooksAPI = {
         client: client
       }
     });
+  },
+  createEstimate: function(estimate) {
+    return sendFBRequest({
+      request: {
+        method: 'estimate.create',
+        estimate: estimate
+      }
+    });
   }
 };
 
@@ -315,8 +323,9 @@ app = require('../app');
 Q = require('q');
 
 onCreateEstimate = function() {
-  var currentContact;
-  currentContact = null;
+  var currentFBContact, currentNimbleContact;
+  currentNimbleContact = null;
+  currentFBContact = null;
   return app.nimbleAPI.getDealContact().then(function(contact) {
     var ref;
     console.log('nimble contact is ', contact);
@@ -327,7 +336,7 @@ onCreateEstimate = function() {
       var client, ref1, ref10, ref2, ref3, ref4, ref5, ref6, ref7, ref8, ref9;
       if (!linkedClient) {
         console.log('creating new freshBooks user');
-        currentContact = contact;
+        currentNimbleContact = contact;
         client = {
           first_name: {
             $t: (ref1 = contact.fields['first name']) != null ? (ref2 = ref1[0]) != null ? ref2.value : void 0 : void 0
@@ -346,13 +355,9 @@ onCreateEstimate = function() {
           var clientId;
           if (response.status = 'ok') {
             clientId = response.client_id.$t;
-            return Q.all([
-              app.exapi.setCompanyData(app.nimbleAPI.getDealIdFromUrl(), {
-                freshBooksClient: clientId
-              }), app.exapi.setCompanyData(currentContact.id, {
-                freshBooksClient: clientId
-              })
-            ]).then(function() {
+            return app.exapi.setCompanyData(currentNimbleContact.id, {
+              freshBooksClientId: clientId
+            }).then(function() {
               return Q.resolve(clientId);
             });
           } else {
@@ -361,11 +366,31 @@ onCreateEstimate = function() {
         });
       } else {
         console.log('working with existed freshBooks user');
-        return Q.resolve(linkedClient.freshBooksClient);
+        return Q.resolve(linkedClient.freshBooksClientId);
       }
     });
   }).then(function(fbClientId) {
-    return console.log('fbClientId is ' + fbClientId);
+    var estimate;
+    currentFBContact = fbClientId;
+    estimate = {
+      client_id: {
+        $t: fbClientId
+      }
+    };
+    return app.fbAPI.createEstimate(estimate);
+  }).then(function(response) {
+    var dealId, estimateId;
+    if (response.status = 'ok') {
+      dealId = app.nimbleAPI.getDealIdFromUrl();
+      console.log(dealId, response);
+      estimateId = response.estimate_id.$t;
+      return app.exapi.setCompanyData(dealId, {
+        freshBooksClientId: currentFBContact,
+        freshBooksEstimateId: estimateId
+      });
+    } else {
+      return Q.reject(response);
+    }
   }).then(function() {
     return renderOnDealView();
   })["catch"](function(error) {
@@ -386,7 +411,7 @@ renderOnDealView = function(alertMessage) {
       return Q.resolve(null);
     }
   }).then(function(dealInfo) {
-    return app.fbAPI.getClientLink(dealInfo != null ? dealInfo.freshBooksClient : void 0);
+    return app.fbAPI.getClientLink(dealInfo != null ? dealInfo.freshBooksClientId : void 0);
   }).then(function(fbClientLink) {
     var React, reactData, reactPage;
     reactData = {

@@ -3,7 +3,8 @@ app = require '../app'
 Q = require 'q'
 
 onCreateEstimate = ->
-  currentContact = null
+  currentNimbleContact = null
+  currentFBContact = null
 
   app.nimbleAPI.getDealContact()
   .then (contact) ->
@@ -15,7 +16,7 @@ onCreateEstimate = ->
     .then (linkedClient) ->
       unless linkedClient
         console.log 'creating new freshBooks user'
-        currentContact = contact
+        currentNimbleContact = contact
         client =
           first_name: $t: contact.fields['first name']?[0]?.value
           last_name: $t: contact.fields['last name']?[0]?.value
@@ -27,22 +28,38 @@ onCreateEstimate = ->
 
           if response.status = 'ok'
             clientId = response.client_id.$t
-            Q.all [
-              app.exapi.setCompanyData app.nimbleAPI.getDealIdFromUrl(), { freshBooksClient: clientId }
-              app.exapi.setCompanyData currentContact.id, { freshBooksClient: clientId }
-            ]
+            app.exapi.setCompanyData currentNimbleContact.id, { freshBooksClientId: clientId }
             .then ->
               Q.resolve clientId
           else
             Q.reject response
       else
         console.log 'working with existed freshBooks user'
-        Q.resolve linkedClient.freshBooksClient
+        Q.resolve linkedClient.freshBooksClientId
 
   .then (fbClientId) ->
-    console.log 'fbClientId is ' + fbClientId
+    currentFBContact = fbClientId
+    estimate =
+      client_id: $t: fbClientId
+    app.fbAPI.createEstimate estimate
+
+  .then (response) ->
+
+    if response.status = 'ok'
+      dealId = app.nimbleAPI.getDealIdFromUrl()
+      console.log dealId, response
+
+      estimateId = response.estimate_id.$t
+      app.exapi.setCompanyData dealId, {
+        freshBooksClientId: currentFBContact
+        freshBooksEstimateId: estimateId
+      }
+    else
+      Q.reject response
+
   .then () ->
     renderOnDealView()
+
   .catch (error) ->
     app.actions.onNimbleError error
 
@@ -58,7 +75,7 @@ renderOnDealView = (alertMessage = null) ->
     else
       Q.resolve null
   .then (dealInfo) ->
-    app.fbAPI.getClientLink dealInfo?.freshBooksClient
+    app.fbAPI.getClientLink dealInfo?.freshBooksClientId
   .then (fbClientLink) ->
 
     reactData = { onCreateEstimate, fbClientLink, alertMessage }
