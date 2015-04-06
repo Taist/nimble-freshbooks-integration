@@ -71,7 +71,7 @@ freshBooksAPI =
   getEstimateLink: (estimateId) ->
     unless estimateId
       return null
-    "#{fbAPIServer}/showEstimate?estimateid=#{estimateId}"
+    "#{fbAPIServer}/updateEstimate?estimateid=#{estimateId}"
 
   getClients: ->
     sendFBRequest
