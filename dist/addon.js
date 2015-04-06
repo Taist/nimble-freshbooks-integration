@@ -140,7 +140,7 @@ freshBooksAPI = {
     if (!estimateId) {
       return null;
     }
-    return fbAPIServer + "/showEstimate?estimateid=" + estimateId;
+    return fbAPIServer + "/updateEstimate?estimateid=" + estimateId;
   },
   getClients: function() {
     return sendFBRequest({
