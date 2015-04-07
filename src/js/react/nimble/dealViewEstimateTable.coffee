@@ -33,7 +33,7 @@ NimbleDealViewEstimateTable = React.createFactory React.createClass
                 td { style: textAlign: 'right' }, 'Hours'
                 td {}, 'Tax'
                 td {}, 'Tax'
-                td { style: textAlign: 'right' }, 'LineTotal'
+                td { style: textAlign: 'right' }, 'Line Total'
             @props.time.map (line) =>
               @createLine line
             if @props.time?.length > 0 and @props.item?.length > 0
@@ -42,12 +42,19 @@ NimbleDealViewEstimateTable = React.createFactory React.createClass
               tr { style: fontWeight: 'bold', borderBottom: '1px solid silver', lineHeight: '24px' },
                 td {}, 'Item'
                 td {}, 'Description'
-                td { style: textAlign: 'right' }, 'UnitCost'
+                td { style: textAlign: 'right' }, 'Unit Cost'
                 td { style: textAlign: 'right' }, 'Qty'
                 td {}, 'Tax'
                 td {}, 'Tax'
-                td { style: textAlign: 'right' }, 'LineTotal'
+                td { style: textAlign: 'right' }, 'Line Total'
             @props.item.map (line) =>
               @createLine line
+            if @props.time?.length > 0 or @props.item?.length > 0
+              tr {}, td { colSpan: 7, style: height: 12 }, ''
+            if @props.time?.length > 0 or @props.item?.length > 0
+              tr {},
+                td { colSpan: 6, style: textAlign: 'right', fontWeight: 'bold' },
+                  "Estimate Total (#{@props.currency})"
+                td { style: textAlign: 'right', fontWeight: 'bold' }, @props.amount
 
 module.exports = NimbleDealViewEstimateTable

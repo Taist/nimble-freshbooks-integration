@@ -752,7 +752,7 @@ NimbleDealViewEstimateTable = React.createFactory(React.createClass({
     }, line.amount.$t));
   },
   render: function() {
-    var ref1, ref2, ref3, ref4, ref5;
+    var ref1, ref2, ref3, ref4, ref5, ref6, ref7, ref8, ref9;
     return div({}, ((ref1 = this.props) != null ? ref1.amount : void 0) != null ? table({
       style: {
         width: '100%'
@@ -775,7 +775,7 @@ NimbleDealViewEstimateTable = React.createFactory(React.createClass({
       style: {
         textAlign: 'right'
       }
-    }, 'LineTotal')) : void 0, this.props.time.map((function(_this) {
+    }, 'Line Total')) : void 0, this.props.time.map((function(_this) {
       return function(line) {
         return _this.createLine(line);
       };
@@ -794,7 +794,7 @@ NimbleDealViewEstimateTable = React.createFactory(React.createClass({
       style: {
         textAlign: 'right'
       }
-    }, 'UnitCost'), td({
+    }, 'Unit Cost'), td({
       style: {
         textAlign: 'right'
       }
@@ -802,11 +802,27 @@ NimbleDealViewEstimateTable = React.createFactory(React.createClass({
       style: {
         textAlign: 'right'
       }
-    }, 'LineTotal')) : void 0, this.props.item.map((function(_this) {
+    }, 'Line Total')) : void 0, this.props.item.map((function(_this) {
       return function(line) {
         return _this.createLine(line);
       };
-    })(this)))) : void 0);
+    })(this)), ((ref6 = this.props.time) != null ? ref6.length : void 0) > 0 || ((ref7 = this.props.item) != null ? ref7.length : void 0) > 0 ? tr({}, td({
+      colSpan: 7,
+      style: {
+        height: 12
+      }
+    }, '')) : void 0, ((ref8 = this.props.time) != null ? ref8.length : void 0) > 0 || ((ref9 = this.props.item) != null ? ref9.length : void 0) > 0 ? tr({}, td({
+      colSpan: 6,
+      style: {
+        textAlign: 'right',
+        fontWeight: 'bold'
+      }
+    }, "Estimate Total (" + this.props.currency + ")"), td({
+      style: {
+        textAlign: 'right',
+        fontWeight: 'bold'
+      }
+    }, this.props.amount)) : void 0)) : void 0);
   }
 }));
 
