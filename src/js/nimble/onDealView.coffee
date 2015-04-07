@@ -88,10 +88,12 @@ renderOnDealView = (alertMessage = null) ->
         estimateTableData = {
           amount: response.estimate?.amount.$t
           currency: response.estimate?.currency_code.$t
+          number: response.estimate?.number.$t
           time: (response.estimate?.lines?.line or []).filter (line) ->
             line?.name?.$t? and line?.type?.$t is 'Time'
           item: (response.estimate?.lines?.line or []).filter (line) ->
             line?.name?.$t? and line?.type?.$t isnt 'Time'
+          fbEstimateLink: fbEstimateLink
         }
       else
         estimateTableData = null

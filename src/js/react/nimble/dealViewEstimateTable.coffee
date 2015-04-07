@@ -1,6 +1,6 @@
 React = require 'react'
 
-{ div, table, tbody, tr } = React.DOM
+{ div, table, tbody, tr, h2, a } = React.DOM
 
 td = (props, data) ->
   unless props.style?
@@ -10,6 +10,9 @@ td = (props, data) ->
   React.DOM.td props, data
 
 NimbleDealViewEstimateTable = React.createFactory React.createClass
+  getInitialState: ->
+    editButtonFocusClass: ''
+
   createLine: (line) ->
     tr { key: line.name.$t, style: borderBottom: '1px solid silver' },
       td {}, line.name.$t
@@ -25,6 +28,26 @@ NimbleDealViewEstimateTable = React.createFactory React.createClass
       if @props?.amount?
         table { style: width: '100%' },
           tbody {},
+            tr {},
+              td { colSpan: 4 },
+                h2 {}, "Estimate: #{@props.number}"
+              td { colSpan: 3, style: textAlign: 'right' },
+                a {
+                  href: @props.fbEstimateLink
+                  target: '_blank'
+                  style:
+                    display: 'inline-block'
+                },
+                  div {
+                    tabIndex: 0
+                    className: "nmbl-Button nmbl-Button-WebkitGecko #{@state.editButtonFocusClass}"
+                    onMouseEnter: => @setState editButtonFocusClass: 'nmbl-Button-focus'
+                    onMouseLeave: => @setState editButtonFocusClass: ''
+                  },
+                    div {
+                      className: 'nmbl-ButtonContent'
+                    }, 'Edit'
+
             if @props.time?.length > 0
               tr { style: fontWeight: 'bold', borderBottom: '1px solid silver', lineHeight: '24px' },
                 td {}, 'Task'
@@ -37,7 +60,7 @@ NimbleDealViewEstimateTable = React.createFactory React.createClass
             @props.time.map (line) =>
               @createLine line
             if @props.time?.length > 0 and @props.item?.length > 0
-              tr {}, td { colSpan: 7, style: height: 12 }, ''
+              tr {}, td { colSpan: 7, style: height: 2 }, ''
             if @props.item?.length > 0
               tr { style: fontWeight: 'bold', borderBottom: '1px solid silver', lineHeight: '24px' },
                 td {}, 'Item'
@@ -50,7 +73,7 @@ NimbleDealViewEstimateTable = React.createFactory React.createClass
             @props.item.map (line) =>
               @createLine line
             if @props.time?.length > 0 or @props.item?.length > 0
-              tr {}, td { colSpan: 7, style: height: 12 }, ''
+              tr {}, td { colSpan: 7, style: height: 2 }, ''
             if @props.time?.length > 0 or @props.item?.length > 0
               tr {},
                 td { colSpan: 6, style: textAlign: 'right', fontWeight: 'bold' },

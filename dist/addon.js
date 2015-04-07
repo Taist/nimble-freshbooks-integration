@@ -449,20 +449,22 @@ renderOnDealView = function(alertMessage) {
     reactPage = require('../react/nimble/dealView');
     React.render(reactPage(reactData), dealViewContainer);
     return app.fbAPI.getEstimate(dealInfo != null ? dealInfo.freshBooksEstimateId : void 0).then(function(response) {
-      var estimateTableData, reactComponent, ref, ref1, ref2, ref3, ref4, ref5;
+      var estimateTableData, reactComponent, ref, ref1, ref2, ref3, ref4, ref5, ref6;
       if ((response != null ? response.status : void 0) === 'ok') {
         console.log(response.estimate);
         estimateTableData = {
           amount: (ref = response.estimate) != null ? ref.amount.$t : void 0,
           currency: (ref1 = response.estimate) != null ? ref1.currency_code.$t : void 0,
-          time: (((ref2 = response.estimate) != null ? (ref3 = ref2.lines) != null ? ref3.line : void 0 : void 0) || []).filter(function(line) {
-            var ref2, ref3;
-            return ((line != null ? (ref2 = line.name) != null ? ref2.$t : void 0 : void 0) != null) && (line != null ? (ref3 = line.type) != null ? ref3.$t : void 0 : void 0) === 'Time';
+          number: (ref2 = response.estimate) != null ? ref2.number.$t : void 0,
+          time: (((ref3 = response.estimate) != null ? (ref4 = ref3.lines) != null ? ref4.line : void 0 : void 0) || []).filter(function(line) {
+            var ref3, ref4;
+            return ((line != null ? (ref3 = line.name) != null ? ref3.$t : void 0 : void 0) != null) && (line != null ? (ref4 = line.type) != null ? ref4.$t : void 0 : void 0) === 'Time';
           }),
-          item: (((ref4 = response.estimate) != null ? (ref5 = ref4.lines) != null ? ref5.line : void 0 : void 0) || []).filter(function(line) {
-            var ref4, ref5;
-            return ((line != null ? (ref4 = line.name) != null ? ref4.$t : void 0 : void 0) != null) && (line != null ? (ref5 = line.type) != null ? ref5.$t : void 0 : void 0) !== 'Time';
-          })
+          item: (((ref5 = response.estimate) != null ? (ref6 = ref5.lines) != null ? ref6.line : void 0 : void 0) || []).filter(function(line) {
+            var ref5, ref6;
+            return ((line != null ? (ref5 = line.name) != null ? ref5.$t : void 0 : void 0) != null) && (line != null ? (ref6 = line.type) != null ? ref6.$t : void 0 : void 0) !== 'Time';
+          }),
+          fbEstimateLink: fbEstimateLink
         };
       } else {
         estimateTableData = null;
@@ -703,24 +705,21 @@ NimbleDealViewPage = React.createFactory(React.createClass({
       style: {
         marginTop: 4
       }
-    }, this.props.fbEstimateLink != null ? a({
-      href: this.props.fbEstimateLink,
-      target: '_blank'
-    }, 'Estimate') : a({
+    }, this.props.fbEstimateLink == null ? a({
       href: 'javascript:void(0)',
       onClick: this.onCreateEstimate
-    }, 'Create estimate')));
+    }, 'Create estimate') : void 0));
   }
 }));
 
 module.exports = NimbleDealViewPage;
 
 },{"react":189}],11:[function(require,module,exports){
-var NimbleDealViewEstimateTable, React, div, ref, table, tbody, td, tr;
+var NimbleDealViewEstimateTable, React, a, div, h2, ref, table, tbody, td, tr;
 
 React = require('react');
 
-ref = React.DOM, div = ref.div, table = ref.table, tbody = ref.tbody, tr = ref.tr;
+ref = React.DOM, div = ref.div, table = ref.table, tbody = ref.tbody, tr = ref.tr, h2 = ref.h2, a = ref.a;
 
 td = function(props, data) {
   if (props.style == null) {
@@ -731,6 +730,11 @@ td = function(props, data) {
 };
 
 NimbleDealViewEstimateTable = React.createFactory(React.createClass({
+  getInitialState: function() {
+    return {
+      editButtonFocusClass: ''
+    };
+  },
   createLine: function(line) {
     return tr({
       key: line.name.$t,
@@ -757,7 +761,39 @@ NimbleDealViewEstimateTable = React.createFactory(React.createClass({
       style: {
         width: '100%'
       }
-    }, tbody({}, ((ref2 = this.props.time) != null ? ref2.length : void 0) > 0 ? tr({
+    }, tbody({}, tr({}, td({
+      colSpan: 4
+    }, h2({}, "Estimate: " + this.props.number)), td({
+      colSpan: 3,
+      style: {
+        textAlign: 'right'
+      }
+    }, a({
+      href: this.props.fbEstimateLink,
+      target: '_blank',
+      style: {
+        display: 'inline-block'
+      }
+    }, div({
+      tabIndex: 0,
+      className: "nmbl-Button nmbl-Button-WebkitGecko " + this.state.editButtonFocusClass,
+      onMouseEnter: (function(_this) {
+        return function() {
+          return _this.setState({
+            editButtonFocusClass: 'nmbl-Button-focus'
+          });
+        };
+      })(this),
+      onMouseLeave: (function(_this) {
+        return function() {
+          return _this.setState({
+            editButtonFocusClass: ''
+          });
+        };
+      })(this)
+    }, div({
+      className: 'nmbl-ButtonContent'
+    }, 'Edit'))))), ((ref2 = this.props.time) != null ? ref2.length : void 0) > 0 ? tr({
       style: {
         fontWeight: 'bold',
         borderBottom: '1px solid silver',
@@ -782,7 +818,7 @@ NimbleDealViewEstimateTable = React.createFactory(React.createClass({
     })(this)), ((ref3 = this.props.time) != null ? ref3.length : void 0) > 0 && ((ref4 = this.props.item) != null ? ref4.length : void 0) > 0 ? tr({}, td({
       colSpan: 7,
       style: {
-        height: 12
+        height: 2
       }
     }, '')) : void 0, ((ref5 = this.props.item) != null ? ref5.length : void 0) > 0 ? tr({
       style: {
@@ -809,7 +845,7 @@ NimbleDealViewEstimateTable = React.createFactory(React.createClass({
     })(this)), ((ref6 = this.props.time) != null ? ref6.length : void 0) > 0 || ((ref7 = this.props.item) != null ? ref7.length : void 0) > 0 ? tr({}, td({
       colSpan: 7,
       style: {
-        height: 12
+        height: 2
       }
     }, '')) : void 0, ((ref8 = this.props.time) != null ? ref8.length : void 0) > 0 || ((ref9 = this.props.item) != null ? ref9.length : void 0) > 0 ? tr({}, td({
       colSpan: 6,
