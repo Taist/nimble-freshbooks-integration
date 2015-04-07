@@ -18,7 +18,9 @@ module.exports = ->
     app.fbAPI.getCreds().then (creds) ->
       onPageCreds = getOnPageCreds()
       isIntegrationEnabled = ( onPageCreds.url is creds?.url and onPageCreds.token is creds?.token )
-
+      
       React = require 'react'
       reactPage = require '../react/freshbooks/apiEnable'
       React.render reactPage( { action, isIntegrationEnabled }), container
+    .catch (error) ->
+      console.log error
