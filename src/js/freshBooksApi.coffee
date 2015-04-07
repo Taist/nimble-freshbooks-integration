@@ -7,6 +7,9 @@ parseFBResponse = (result) ->
   json = XMLMapping.load(result, throwErrors: true)
   json.response
 
+sendFBRequestStub = () ->
+  Q.resolve status: 'FB_PROXY_ERROR'
+
 sendFBRequest = (requestData) ->
   freshBooksAPI.getCreds()
   .then (creds) ->
@@ -44,8 +47,9 @@ sendFBRequestByProxy = (requestData) ->
   .then (result) ->
     parseFBResponse result
   .catch (error) ->
+    #Use stub instead of real function
+    sendFBRequest = sendFBRequestStub
     app.actions.onNimbleError 'FB_PROXY_ERROR'
-    console.log error
 
 sendFBRequest = sendFBRequestByProxy if location.host.match /nimble\.com/i
 
