@@ -37,7 +37,7 @@ NimbleDealViewPage = React.createFactory React.createClass
             div { className: 'closeOrange', onClick: @onCloseAlert }
       div { style: marginTop: 4},
         if @props.fbEstimateLink?
-          a { href: @props.fbEstimateLink, target: '_freshBooks' }, 'Estimate'
+          a { href: @props.fbEstimateLink, target: '_blank' }, 'Estimate'
         else
           a {
             href: 'javascript:void(0)'

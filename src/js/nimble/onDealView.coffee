@@ -54,6 +54,9 @@ onCreateEstimate = ->
         freshBooksClientId: currentFBContact
         freshBooksEstimateId: estimateId
       }
+
+      fbEstimateLink = app.fbAPI.getEstimateLink estimateId
+      window.open fbEstimateLink, '_blank'
     else
       Q.reject response
 
@@ -69,33 +72,32 @@ dealViewEstimateTable = null
 renderOnDealView = (alertMessage = null) ->
   app.exapi.getCompanyData app.nimbleAPI.getDealIdFromUrl()
   .then (dealInfo) ->
-    if dealInfo?.freshBooksEstimateId?
 
-      fbEstimateLink = app.fbAPI.getEstimateLink dealInfo?.freshBooksEstimateId
+    fbEstimateLink = app.fbAPI.getEstimateLink dealInfo?.freshBooksEstimateId
 
-      React = require 'react'
-      reactData = { onCreateEstimate, fbEstimateLink, alertMessage }
-      reactPage = require '../react/nimble/dealView'
-      React.render reactPage( reactData ), dealViewContainer
+    React = require 'react'
+    reactData = { onCreateEstimate, fbEstimateLink, alertMessage }
+    reactPage = require '../react/nimble/dealView'
+    React.render reactPage( reactData ), dealViewContainer
 
-      app.fbAPI.getEstimate dealInfo?.freshBooksEstimateId
-      .then (response) ->
+    app.fbAPI.getEstimate dealInfo?.freshBooksEstimateId
+    .then (response) ->
 
-        if response?.status is 'ok'
-          console.log response.estimate
-          estimateTableData = {
-            amount: response.estimate?.amount.$t
-            currency: response.estimate?.currency_code.$t
-            time: (response.estimate?.lines?.line or []).filter (line) ->
-              line?.name?.$t? and line?.type?.$t is 'Time'
-            item: (response.estimate?.lines?.line or []).filter (line) ->
-              line?.name?.$t? and line?.type?.$t isnt 'Time'
-          }
-        else
-          estimateTableData = null
+      if response?.status is 'ok'
+        console.log response.estimate
+        estimateTableData = {
+          amount: response.estimate?.amount.$t
+          currency: response.estimate?.currency_code.$t
+          time: (response.estimate?.lines?.line or []).filter (line) ->
+            line?.name?.$t? and line?.type?.$t is 'Time'
+          item: (response.estimate?.lines?.line or []).filter (line) ->
+            line?.name?.$t? and line?.type?.$t isnt 'Time'
+        }
+      else
+        estimateTableData = null
 
-        reactComponent = require '../react/nimble/dealViewEstimateTable'
-        React.render reactComponent( estimateTableData ), dealViewEstimateTable
+      reactComponent = require '../react/nimble/dealViewEstimateTable'
+      React.render reactComponent( estimateTableData ), dealViewEstimateTable
 
   .catch (error) ->
     app.actions.onNimbleError error
