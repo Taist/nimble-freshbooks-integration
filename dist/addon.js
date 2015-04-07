@@ -794,14 +794,18 @@ NimbleDealViewEstimateTable = React.createFactory(React.createClass({
     }, line.amount.$t));
   },
   render: function() {
-    var ref1, ref2, ref3, ref4, ref5, ref6, ref7, ref8, ref9;
+    var ref1, ref10, ref11, ref2, ref3, ref4, ref5, ref6, ref7, ref8, ref9;
     return div({}, ((ref1 = this.props) != null ? ref1.amount : void 0) != null ? table({
       style: {
         width: '100%'
       }
     }, tbody({}, tr({}, td({
       colSpan: 4
-    }, h2({}, "Estimate: " + this.props.number)), td({
+    }, h2({
+      style: {
+        marginBottom: 12
+      }
+    }, "Estimate: " + this.props.number)), td({
       colSpan: 3,
       style: {
         textAlign: 'right'
@@ -831,7 +835,9 @@ NimbleDealViewEstimateTable = React.createFactory(React.createClass({
       })(this)
     }, div({
       className: 'nmbl-ButtonContent'
-    }, 'Edit'))))), ((ref2 = this.props.time) != null ? ref2.length : void 0) > 0 ? tr({
+    }, 'Edit'))))), ((ref2 = this.props.time) != null ? ref2.length : void 0) === 0 && ((ref3 = this.props.item) != null ? ref3.length : void 0) === 0 ? tr({}, td({
+      colSpan: 7
+    }, 'Estimate is empty')) : void 0, ((ref4 = this.props.time) != null ? ref4.length : void 0) > 0 ? tr({
       style: {
         fontWeight: 'bold',
         borderBottom: '1px solid silver',
@@ -853,12 +859,12 @@ NimbleDealViewEstimateTable = React.createFactory(React.createClass({
       return function(line) {
         return _this.createLine(line);
       };
-    })(this)), ((ref3 = this.props.time) != null ? ref3.length : void 0) > 0 && ((ref4 = this.props.item) != null ? ref4.length : void 0) > 0 ? tr({}, td({
+    })(this)), ((ref5 = this.props.time) != null ? ref5.length : void 0) > 0 && ((ref6 = this.props.item) != null ? ref6.length : void 0) > 0 ? tr({}, td({
       colSpan: 7,
       style: {
         height: 2
       }
-    }, '')) : void 0, ((ref5 = this.props.item) != null ? ref5.length : void 0) > 0 ? tr({
+    }, '')) : void 0, ((ref7 = this.props.item) != null ? ref7.length : void 0) > 0 ? tr({
       style: {
         fontWeight: 'bold',
         borderBottom: '1px solid silver',
@@ -880,12 +886,12 @@ NimbleDealViewEstimateTable = React.createFactory(React.createClass({
       return function(line) {
         return _this.createLine(line);
       };
-    })(this)), ((ref6 = this.props.time) != null ? ref6.length : void 0) > 0 || ((ref7 = this.props.item) != null ? ref7.length : void 0) > 0 ? tr({}, td({
+    })(this)), ((ref8 = this.props.time) != null ? ref8.length : void 0) > 0 || ((ref9 = this.props.item) != null ? ref9.length : void 0) > 0 ? tr({}, td({
       colSpan: 7,
       style: {
         height: 2
       }
-    }, '')) : void 0, ((ref8 = this.props.time) != null ? ref8.length : void 0) > 0 || ((ref9 = this.props.item) != null ? ref9.length : void 0) > 0 ? tr({}, td({
+    }, '')) : void 0, ((ref10 = this.props.time) != null ? ref10.length : void 0) > 0 || ((ref11 = this.props.item) != null ? ref11.length : void 0) > 0 ? tr({}, td({
       colSpan: 6,
       style: {
         textAlign: 'right',

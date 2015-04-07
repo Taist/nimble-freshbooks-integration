@@ -30,7 +30,7 @@ NimbleDealViewEstimateTable = React.createFactory React.createClass
           tbody {},
             tr {},
               td { colSpan: 4 },
-                h2 {}, "Estimate: #{@props.number}"
+                h2 { style: marginBottom: 12 }, "Estimate: #{@props.number}"
               td { colSpan: 3, style: textAlign: 'right' },
                 a {
                   href: @props.fbEstimateLink
@@ -48,6 +48,8 @@ NimbleDealViewEstimateTable = React.createFactory React.createClass
                       className: 'nmbl-ButtonContent'
                     }, 'Edit'
 
+            if @props.time?.length is 0 and @props.item?.length is 0
+              tr {}, td { colSpan: 7 }, 'Estimate is empty'
             if @props.time?.length > 0
               tr { style: fontWeight: 'bold', borderBottom: '1px solid silver', lineHeight: '24px' },
                 td {}, 'Task'
