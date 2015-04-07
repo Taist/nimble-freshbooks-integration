@@ -49,7 +49,7 @@ sendFBRequestByProxy = (requestData) ->
   .catch (error) ->
     #Use stub instead of real function
     sendFBRequest = sendFBRequestStub
-    app.actions.onNimbleError 'FB_PROXY_ERROR'
+    'FB_PROXY_ERROR'
 
 sendFBRequest = sendFBRequestByProxy if location.host.match /nimble\.com/i
 
@@ -68,12 +68,12 @@ freshBooksAPI =
       creds
 
   getClientLink: (clientId) ->
-    unless clientId
+    if not clientId or not fbAPIServer
       return null
     "#{fbAPIServer}/showUser?userid=#{clientId}"
 
   getEstimateLink: (estimateId) ->
-    unless estimateId
+    if not estimateId or not fbAPIServer
       return null
     "#{fbAPIServer}/updateEstimate?estimateid=#{estimateId}"
 
@@ -101,6 +101,9 @@ freshBooksAPI =
       request:
         method: 'estimate.get'
         estimate_id: $t: estimateId
+    .catch (error) ->
+      # Suppres access error
+      Q.resolve error
 
 module.exports =
   init: (_app, propertyName) ->

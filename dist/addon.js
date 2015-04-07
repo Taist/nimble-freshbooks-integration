@@ -112,7 +112,7 @@ sendFBRequestByProxy = function(requestData) {
     return parseFBResponse(result);
   })["catch"](function(error) {
     sendFBRequest = sendFBRequestStub;
-    return app.actions.onNimbleError('FB_PROXY_ERROR');
+    return 'FB_PROXY_ERROR';
   });
 };
 
@@ -137,13 +137,13 @@ freshBooksAPI = {
     });
   },
   getClientLink: function(clientId) {
-    if (!clientId) {
+    if (!clientId || !fbAPIServer) {
       return null;
     }
     return fbAPIServer + "/showUser?userid=" + clientId;
   },
   getEstimateLink: function(estimateId) {
-    if (!estimateId) {
+    if (!estimateId || !fbAPIServer) {
       return null;
     }
     return fbAPIServer + "/updateEstimate?estimateid=" + estimateId;
@@ -181,6 +181,8 @@ freshBooksAPI = {
           $t: estimateId
         }
       }
+    })["catch"](function(error) {
+      return Q.resolve(error);
     });
   }
 };
