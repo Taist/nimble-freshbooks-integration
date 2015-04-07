@@ -836,7 +836,11 @@ NimbleDealViewEstimateTable = React.createFactory(React.createClass({
     }, div({
       className: 'nmbl-ButtonContent'
     }, 'Edit'))))), ((ref2 = this.props.time) != null ? ref2.length : void 0) === 0 && ((ref3 = this.props.item) != null ? ref3.length : void 0) === 0 ? tr({}, td({
-      colSpan: 7
+      colSpan: 7,
+      style: {
+        textAlign: 'center',
+        fontStyle: 'italic'
+      }
     }, 'Estimate is empty')) : void 0, ((ref4 = this.props.time) != null ? ref4.length : void 0) > 0 ? tr({
       style: {
         fontWeight: 'bold',

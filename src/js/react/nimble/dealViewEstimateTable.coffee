@@ -49,7 +49,8 @@ NimbleDealViewEstimateTable = React.createFactory React.createClass
                     }, 'Edit'
 
             if @props.time?.length is 0 and @props.item?.length is 0
-              tr {}, td { colSpan: 7 }, 'Estimate is empty'
+              tr {}, td { colSpan: 7, style: textAlign: 'center', fontStyle: 'italic' },
+                'Estimate is empty'
             if @props.time?.length > 0
               tr { style: fontWeight: 'bold', borderBottom: '1px solid silver', lineHeight: '24px' },
                 td {}, 'Task'
