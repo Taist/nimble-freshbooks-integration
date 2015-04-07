@@ -129,7 +129,7 @@ freshBooksAPI = {
   getCreds: function() {
     return app.exapi.getUserData('freshBooksCreds').then(function(creds) {
       var a;
-      if (!fbAPIServer) {
+      if (creds && !fbAPIServer) {
         (a = document.createElement('a')).href = creds.url;
         fbAPIServer = a.protocol + "//" + a.host;
       }

@@ -62,7 +62,7 @@ freshBooksAPI =
   getCreds: ->
     app.exapi.getUserData 'freshBooksCreds'
     .then (creds) ->
-      unless fbAPIServer
+      if creds and not fbAPIServer
         ( a = document.createElement 'a' ).href = creds.url
         fbAPIServer = "#{a.protocol}//#{a.host}"
       creds
