@@ -33,7 +33,10 @@ app =
     onNimbleError: (messageCode) ->
       console.log 'onNimbleError', messageCode
       if appErrors[messageCode]?
-        require('./nimble/onDealView') appErrors[messageCode]
+        require('./nimble/onDealView') {
+          alertMessage: appErrors[messageCode]
+          isSpinnerActive: false
+        }
 
     setFreshBooksCreds: (creds) ->
       app.fbAPI.setCreds creds

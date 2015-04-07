@@ -61,7 +61,7 @@ onCreateEstimate = ->
       Q.reject response
 
   .then () ->
-    renderOnDealView()
+    renderOnDealView isSpinnerActive: false
 
   .catch (error) ->
     app.actions.onNimbleError error
@@ -69,14 +69,19 @@ onCreateEstimate = ->
 dealViewContainer = null
 dealViewEstimateTable = null
 
-renderOnDealView = (alertMessage = null) ->
+renderOnDealView = (options = {}) ->
   app.exapi.getCompanyData app.nimbleAPI.getDealIdFromUrl()
   .then (dealInfo) ->
 
     fbEstimateLink = app.fbAPI.getEstimateLink dealInfo?.freshBooksEstimateId
 
     React = require 'react'
-    reactData = { onCreateEstimate, fbEstimateLink, alertMessage }
+    reactData = {
+      onCreateEstimate,
+      fbEstimateLink,
+      alertMessage: options.alertMessage
+      isSpinnerActive: options.isSpinnerActive 
+    }
     reactPage = require '../react/nimble/dealView'
     React.render reactPage( reactData ), dealViewContainer
 
@@ -104,7 +109,7 @@ renderOnDealView = (alertMessage = null) ->
   .catch (error) ->
     app.actions.onNimbleError error
 
-module.exports = (alertMessage) ->
+module.exports = (options) ->
   unless dealViewContainer
     app.observer.waitElement '.DealView .profileInfoWrapper', (elem) ->
 
@@ -114,6 +119,6 @@ module.exports = (alertMessage) ->
       dealViewEstimateTable = document.createElement 'div'
       elem.insertBefore dealViewEstimateTable, elem.querySelector('.fullInfoContainer')
 
-      renderOnDealView alertMessage
+      renderOnDealView options
   else
-    renderOnDealView alertMessage
+    renderOnDealView options
