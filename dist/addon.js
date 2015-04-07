@@ -62,9 +62,7 @@ parseFBResponse = function(result) {
 };
 
 sendFBRequestStub = function() {
-  return Q.resolve({
-    status: 'FB_PROXY_ERROR'
-  });
+  return Q.resolve('FB_PROXY_ERROR');
 };
 
 sendFBRequest = function(requestData) {

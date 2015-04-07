@@ -8,7 +8,7 @@ parseFBResponse = (result) ->
   json.response
 
 sendFBRequestStub = () ->
-  Q.resolve status: 'FB_PROXY_ERROR'
+  Q.resolve 'FB_PROXY_ERROR'
 
 sendFBRequest = (requestData) ->
   freshBooksAPI.getCreds()
