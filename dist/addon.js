@@ -28149,7 +28149,7 @@ function strval(s) {
   }
   else if (typeof s == 'function') {
     return s();
-  } 
+  }
   else if (s instanceof XMLWriter) {
     return s.toString();
   }
@@ -28219,7 +28219,7 @@ XMLWriter.prototype = {
 
     startDocument : function (version, encoding, standalone) {
         if (this.tags || this.attributes) return this;
-        
+
         this.startPI('xml');
         this.startAttribute('version');
         this.text(typeof version == "string" ? version : "1.0");
@@ -28267,7 +28267,7 @@ XMLWriter.prototype = {
         this.texts = 0;
         if (this.stack.length > 0)
           this.stack[this.stack.length-1].containsTag = true;
-        
+
         this.stack.push({
             name: name,
             tags: this.tags
@@ -28289,7 +28289,7 @@ XMLWriter.prototype = {
         this.texts = 0;
         if (this.stack.length > 0)
           this.stack[this.stack.length-1].containsTag = true;
-        
+
         this.stack.push({
             name: prefix + ':' + name,
             tags: this.tags
@@ -28402,7 +28402,7 @@ XMLWriter.prototype = {
             return this;
         } else if (this.attributes && !this.attribute) {
             this.endAttributes();
-        } 
+        }
         if (this.comment || this.cdata) {
             this.write(content);
         }
@@ -28514,7 +28514,7 @@ XMLWriter.prototype = {
         return this;
     },
 
-    writeRaw : function(content) {  
+    writeRaw : function(content) {
         content = strval(content);
         if (!this.tags && !this.comment && !this.pi && !this.cdata) return this;
         if (this.attributes && this.attribute) {
