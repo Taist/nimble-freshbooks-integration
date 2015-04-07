@@ -1,8 +1,9 @@
 {
-  "id": "nimble-freshbooks-integration",
-  "title": "Nimble Freshbooks Integration",
+  "id": "nimble-freshbooks-estimates",
+  "title": "[beta] Freshbooks estimates",
   "siteName": "Nimble",
   "js": "addon.js",
-  "shortDescription": "Nimble Freshbooks Integration",
-  "siteRegexp": "(freshbooks|nimble)\\.com"
+  "shortDescription": "Embeds estimates from Freshbooks into Deals",
+  "siteRegexp": "(freshbooks|nimble)\\.com",
+  "description": "./addon-description.md"
 }
