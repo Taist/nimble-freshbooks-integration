@@ -6,7 +6,7 @@ Q = require('q');
 appData = {};
 
 appErrors = {
-  CONTACT_NOT_FOUND: 'Please fill \'Person\' field of this deal before creating an estimate',
+  CONTACT_NOT_FOUND: "Please set a contact person (and check that his email is set) before creating an estimate",
   FB_PROXY_ERROR: "Can't connect to Freshbooks. Please enable its integration with Nimble (My account -> Freshbooks API)"
 };
 
