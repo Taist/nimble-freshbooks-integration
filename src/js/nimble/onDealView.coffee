@@ -64,10 +64,13 @@ onCreateEstimate = ->
 
       unless linkedClient
         currentNimbleContact = contact
+
+        firstPerson = companyMembers.shift()
+
         client =
-          first_name: $t: companyMembers[0].first_name
-          last_name: $t: companyMembers[0].last_name
-          email: $t: companyMembers[0].email
+          first_name: $t: firstPerson.first_name
+          last_name: $t: firstPerson.last_name
+          email: $t: firstPerson.email
           organization: $t: contact.fields['company name']?[0]?.value
 
           p_street1: $t: companyAddress.street
@@ -75,6 +78,17 @@ onCreateEstimate = ->
           p_state: $t: companyAddress.state
           p_country: $t: companyAddress.country
           p_code: $t: companyAddress.zip
+
+        additionalContacts = companyMembers
+          .filter (member) ->
+            member.email?
+          .map (member) ->
+            first_name: $t: member.first_name
+            last_name: $t: member.last_name
+            email: $t: member.email
+
+        if additionalContacts.length
+          client.contacts = contact: additionalContacts
 
         console.log 'creating new freshBooks client', client
 
