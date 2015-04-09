@@ -419,12 +419,12 @@ onCreateEstimate = function() {
       return app.exapi.getCompanyData(primaryContactId);
     }).then(function(linkedClient) {
       var client, ref, ref1;
+      console.log(companyMembers);
       if (!linkedClient) {
-        console.log('creating new freshBooks user');
         currentNimbleContact = contact;
         client = {
           first_name: {
-            $t: companyMembers[0].first_mame
+            $t: companyMembers[0].first_name
           },
           last_name: {
             $t: companyMembers[0].last_name
@@ -436,6 +436,7 @@ onCreateEstimate = function() {
             $t: (ref = contact.fields['company name']) != null ? (ref1 = ref[0]) != null ? ref1.value : void 0 : void 0
           }
         };
+        console.log('creating new freshBooks client', client);
         return app.fbAPI.createClient(client).then(function(response) {
           var clientId;
           if (response.status === 'ok') {

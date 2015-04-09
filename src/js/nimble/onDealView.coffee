@@ -60,14 +60,17 @@ onCreateEstimate = ->
       app.exapi.getCompanyData primaryContactId
 
     .then (linkedClient) ->
+      console.log companyMembers
+
       unless linkedClient
-        console.log 'creating new freshBooks user'
         currentNimbleContact = contact
         client =
-          first_name: $t: companyMembers[0].first_mame
+          first_name: $t: companyMembers[0].first_name
           last_name: $t: companyMembers[0].last_name
           email: $t: companyMembers[0].email
           organization: $t: contact.fields['company name']?[0]?.value
+
+        console.log 'creating new freshBooks client', client
 
         app.fbAPI.createClient client
         .then (response) ->
