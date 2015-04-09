@@ -37,8 +37,6 @@ NimbleDealViewPage = React.createFactory React.createClass
       @props.onCreateEstimate()
 
   render: ->
-    console.log @props
-    console.log @state
     div {},
       div {},
         if @state.alertMessage?

@@ -6,7 +6,10 @@ Q = require('q');
 appData = {};
 
 appErrors = {
-  CONTACT_NOT_FOUND: "Please set a contact person (and check that his email is set) before creating an estimate",
+  COMPANY_NOT_FOUND: "Please set a company before creating an estimate",
+  COMPANY_IS_EMPTY: "Please link any person to the deal company",
+  COMPANY_ADDRESS_IS_INCOMPLETE: "Company address is incopmlete. Please fill in 'City', 'Zip' and 'Street address'",
+  NO_MEMBERS_WITH_EMAIL: "Please set email for any company member",
   FB_PROXY_ERROR: "Can't connect to Freshbooks. Please enable its integration with Nimble (My account -> Freshbooks API)"
 };
 
@@ -29,12 +32,10 @@ app = {
   actions: {
     onNimbleError: function(messageCode) {
       console.log('onNimbleError', messageCode);
-      if (appErrors[messageCode] != null) {
-        return require('./nimble/onDealView')({
-          alertMessage: appErrors[messageCode],
-          isSpinnerActive: false
-        });
-      }
+      return require('./nimble/onDealView')({
+        alertMessage: appErrors[messageCode],
+        isSpinnerActive: false
+      });
     },
     setFreshBooksCreds: function(creds) {
       return app.fbAPI.setCreds(creds);
@@ -350,39 +351,89 @@ _listenForRequestFinish = function(request) {
 };
 
 },{}],6:[function(require,module,exports){
-var Q, app, dealViewContainer, dealViewEstimateTable, onCreateEstimate, renderOnDealView;
+var Q, app, dealViewContainer, dealViewEstimateTable, getVerifiedAddress, onCreateEstimate, renderOnDealView;
 
 app = require('../app');
 
 Q = require('q');
 
+getVerifiedAddress = function(contact) {
+  var address, ref, ref1, ref2, ref3;
+  if (((ref = contact.fields) != null ? (ref1 = ref.address) != null ? ref1[0] : void 0 : void 0) != null) {
+    address = JSON.parse(((ref2 = contact.fields) != null ? (ref3 = ref2.address) != null ? ref3[0].value : void 0 : void 0) || "");
+    if ((address.city != null) && (address.zip != null) && (address.street != null)) {
+      return address;
+    }
+  }
+  return null;
+};
+
 onCreateEstimate = function() {
   var currentFBContact, currentNimbleContact;
   currentNimbleContact = null;
   currentFBContact = null;
-  return app.nimbleAPI.getDealContact().then(function(contact) {
-    var ref;
-    console.log('nimble contact is ', contact);
-    if (!(((contact != null ? (ref = contact.fields) != null ? ref.email : void 0 : void 0) != null) && (contact != null ? contact.record_type : void 0) === 'person')) {
-      return Q.reject('CONTACT_NOT_FOUND');
+  return app.nimbleAPI.getDealInfo().then(function(dealInfo) {
+    var companyAddress, companyMembers, contact, primaryContactId;
+    console.log(dealInfo);
+    primaryContactId = dealInfo.deal.related_primary[0];
+    if (primaryContactId) {
+      contact = dealInfo.contacts[primaryContactId];
     }
-    return app.exapi.getCompanyData(contact.id).then(function(linkedClient) {
-      var client, ref1, ref2, ref3, ref4, ref5, ref6, ref7, ref8;
+    if (contact.record_type !== 'company') {
+      return Q.reject('COMPANY_NOT_FOUND');
+    }
+    if (!(contact.children.length > 0)) {
+      return Q.reject('COMPANY_IS_EMPTY');
+    }
+    companyAddress = getVerifiedAddress(contact);
+    if (!companyAddress) {
+      return Q.reject('COMPANY_ADDRESS_IS_INCOMPLETE');
+    }
+    companyMembers = [];
+    return Q.all(contact.children.map(function(memberId) {
+      return app.nimbleAPI.getContactById(memberId);
+    })).then(function(companyMembersInfo) {
+      var ref;
+      companyMembers = companyMembersInfo.map(function(memberInfo) {
+        var member, ref, ref1, ref2, ref3, ref4, ref5;
+        member = memberInfo.resources[0];
+        return {
+          first_name: (ref = member.fields['first name']) != null ? (ref1 = ref[0]) != null ? ref1.value : void 0 : void 0,
+          last_name: (ref2 = member.fields['last name']) != null ? (ref3 = ref2[0]) != null ? ref3.value : void 0 : void 0,
+          email: (ref4 = member.fields['email']) != null ? (ref5 = ref4[0]) != null ? ref5.value : void 0 : void 0
+        };
+      });
+      companyMembers.sort(function(a, b) {
+        if ((a.email == null) && b.email) {
+          return 1;
+        } else {
+          return 0;
+        }
+      });
+      if (!((ref = companyMembers[0]) != null ? ref.email : void 0)) {
+        return Q.reject('NO_MEMBERS_WITH_EMAIL');
+      } else {
+        return Q.resolve(companyMembers);
+      }
+    }).then(function(companyMembers) {
+      return app.exapi.getCompanyData(primaryContactId);
+    }).then(function(linkedClient) {
+      var client, ref, ref1;
       if (!linkedClient) {
         console.log('creating new freshBooks user');
         currentNimbleContact = contact;
         client = {
           first_name: {
-            $t: (ref1 = contact.fields['first name']) != null ? (ref2 = ref1[0]) != null ? ref2.value : void 0 : void 0
+            $t: companyMembers[0].first_mame
           },
           last_name: {
-            $t: (ref3 = contact.fields['last name']) != null ? (ref4 = ref3[0]) != null ? ref4.value : void 0 : void 0
-          },
-          organization: {
-            $t: (ref5 = contact.fields['parent company']) != null ? (ref6 = ref5[0]) != null ? ref6.value : void 0 : void 0
+            $t: companyMembers[0].last_name
           },
           email: {
-            $t: (ref7 = contact.fields['email']) != null ? (ref8 = ref7[0]) != null ? ref8.value : void 0 : void 0
+            $t: companyMembers[0].email
+          },
+          organization: {
+            $t: (ref = contact.fields['company name']) != null ? (ref1 = ref[0]) != null ? ref1.value : void 0 : void 0
           }
         };
         return app.fbAPI.createClient(client).then(function(response) {
@@ -581,18 +632,14 @@ nimbleAPI = {
       return null;
     }
   },
-  getDealContact: function() {
+  getDealInfo: function() {
     var dealId;
     if (dealId = nimbleAPI.getDealIdFromUrl()) {
-      return sendNimbleRequest("/api/deals/" + dealId).then(function(deal) {
-        var contactId, ref;
-        if (contactId = (ref = Object.keys(deal != null ? deal.contacts : void 0)) != null ? ref[0] : void 0) {
-          return Q.resolve(deal.contacts[contactId]);
-        }
-      })["catch"](function(error) {
-        return console.log(error);
-      });
+      return sendNimbleRequest("/api/deals/" + dealId);
     }
+  },
+  getContactById: function(contactId) {
+    return sendNimbleRequest("/api/v1/contacts/detail/?id=" + contactId);
   }
 };
 
@@ -717,8 +764,6 @@ NimbleDealViewPage = React.createFactory(React.createClass({
     })(this));
   },
   render: function() {
-    console.log(this.props);
-    console.log(this.state);
     return div({}, div({}, this.state.alertMessage != null ? div({
       className: 'nmbl-StatusPanel nmbl-StatusPanel-warning',
       style: {

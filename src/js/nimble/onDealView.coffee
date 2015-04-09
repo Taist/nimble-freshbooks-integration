@@ -2,26 +2,72 @@ app = require '../app'
 
 Q = require 'q'
 
+getVerifiedAddress = (contact) ->
+  if contact.fields?.address?[0]?
+    address = JSON.parse contact.fields?.address?[0].value or ""
+    if address.city? and address.zip? and address.street?
+      return address
+
+  return null
+
 onCreateEstimate = ->
   currentNimbleContact = null
   currentFBContact = null
 
-  app.nimbleAPI.getDealContact()
-  .then (contact) ->
-    console.log 'nimble contact is ', contact
-    unless contact?.fields?.email? and contact?.record_type is 'person'
-      return Q.reject 'CONTACT_NOT_FOUND'
+  app.nimbleAPI.getDealInfo()
+  .then (dealInfo) ->
 
-    app.exapi.getCompanyData contact.id
+    console.log dealInfo
+
+    primaryContactId = dealInfo.deal.related_primary[0]
+    if primaryContactId
+      contact = dealInfo.contacts[primaryContactId]
+
+    unless contact.record_type is 'company'
+      return Q.reject 'COMPANY_NOT_FOUND'
+
+    unless contact.children.length > 0
+      return Q.reject 'COMPANY_IS_EMPTY'
+
+    companyAddress = getVerifiedAddress contact
+    unless companyAddress
+      return Q.reject 'COMPANY_ADDRESS_IS_INCOMPLETE'
+
+    companyMembers = []
+
+    Q.all contact.children.map (memberId) ->
+      app.nimbleAPI.getContactById memberId
+
+    .then (companyMembersInfo) ->
+      companyMembers = companyMembersInfo.map (memberInfo) ->
+        member = memberInfo.resources[0]
+
+        return {
+          first_name: member.fields['first name']?[0]?.value
+          last_name: member.fields['last name']?[0]?.value
+          email: member.fields['email']?[0]?.value
+        }
+
+      companyMembers.sort (a, b) ->
+        if not a.email? and b.email then 1 else 0
+
+      unless companyMembers[0]?.email
+        return Q.reject 'NO_MEMBERS_WITH_EMAIL'
+      else
+        return Q.resolve companyMembers
+
+    .then (companyMembers) ->
+      app.exapi.getCompanyData primaryContactId
+
     .then (linkedClient) ->
       unless linkedClient
         console.log 'creating new freshBooks user'
         currentNimbleContact = contact
         client =
-          first_name: $t: contact.fields['first name']?[0]?.value
-          last_name: $t: contact.fields['last name']?[0]?.value
-          organization: $t: contact.fields['parent company']?[0]?.value
-          email: $t: contact.fields['email']?[0]?.value
+          first_name: $t: companyMembers[0].first_mame
+          last_name: $t: companyMembers[0].last_name
+          email: $t: companyMembers[0].email
+          organization: $t: contact.fields['company name']?[0]?.value
 
         app.fbAPI.createClient client
         .then (response) ->
@@ -80,7 +126,7 @@ renderOnDealView = (options = {}) ->
       onCreateEstimate,
       fbEstimateLink,
       alertMessage: options.alertMessage
-      isSpinnerActive: options.isSpinnerActive 
+      isSpinnerActive: options.isSpinnerActive
     }
     reactPage = require '../react/nimble/dealView'
     React.render reactPage( reactData ), dealViewContainer

@@ -26,14 +26,12 @@ nimbleAPI =
     matches = location.hash.match /deals\/[^?]+\?id=([0-9a-f]{24})/
     if matches then matches[1] else null
 
-  getDealContact: () ->
+  getDealInfo: () ->
     if dealId = nimbleAPI.getDealIdFromUrl()
       sendNimbleRequest "/api/deals/#{dealId}"
-      .then (deal) ->
-        if contactId = Object.keys(deal?.contacts)?[0]
-          Q.resolve deal.contacts[contactId]
-      .catch (error) ->
-        console.log error
+
+  getContactById: (contactId) ->
+    sendNimbleRequest "/api/v1/contacts/detail/?id=#{contactId}"
 
 module.exports =
   init: (_app, propertyName) ->
