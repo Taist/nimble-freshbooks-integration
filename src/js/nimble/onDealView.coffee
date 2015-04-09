@@ -70,6 +70,12 @@ onCreateEstimate = ->
           email: $t: companyMembers[0].email
           organization: $t: contact.fields['company name']?[0]?.value
 
+          p_street1: $t: companyAddress.street
+          p_city: $t: companyAddress.city
+          p_state: $t: companyAddress.state
+          p_country: $t: companyAddress.country
+          p_code: $t: companyAddress.zip
+
         console.log 'creating new freshBooks client', client
 
         app.fbAPI.createClient client

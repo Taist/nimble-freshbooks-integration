@@ -434,6 +434,21 @@ onCreateEstimate = function() {
           },
           organization: {
             $t: (ref = contact.fields['company name']) != null ? (ref1 = ref[0]) != null ? ref1.value : void 0 : void 0
+          },
+          p_street1: {
+            $t: companyAddress.street
+          },
+          p_city: {
+            $t: companyAddress.city
+          },
+          p_state: {
+            $t: companyAddress.state
+          },
+          p_country: {
+            $t: companyAddress.country
+          },
+          p_code: {
+            $t: companyAddress.zip
           }
         };
         console.log('creating new freshBooks client', client);
