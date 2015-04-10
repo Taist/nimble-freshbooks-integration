@@ -5,10 +5,11 @@ appData = {
 }
 
 appErrors =
-  COMPANY_NOT_FOUND: "Please set a company before creating an estimate"
-  COMPANY_IS_EMPTY: "Please link any person to the deal company"
-  COMPANY_ADDRESS_IS_INCOMPLETE: "Company address is incopmlete. Please fill in 'City', 'Zip' and 'Street address'"
-  NO_MEMBERS_WITH_EMAIL: "Please set email for any company member"
+  COMPANY_NOT_FOUND: "Please link a company to the deal"
+  COMPANY_NO_PEOPLE: "Please link a person to the company linked to the deal"
+  COMPANY_ADDRESS_IS_INCOMPLETE: "Please fill in company's address: Street address, City and Zip"
+  COMPANY_NO_PEOPLE_NO_ADDRESS: "Please link a person to a company and fill in company's address: Street address, City and Zip"
+  NO_MEMBERS_WITH_EMAIL: "Please set email for the person linked to the company in the deal"
   FB_PROXY_ERROR: "Can't connect to Freshbooks. Please enable its integration with Nimble (My account -> Freshbooks API)"
 
 app =

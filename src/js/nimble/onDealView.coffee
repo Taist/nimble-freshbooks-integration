@@ -26,11 +26,16 @@ onCreateEstimate = ->
     unless contact.record_type is 'company'
       return Q.reject 'COMPANY_NOT_FOUND'
 
-    unless contact.children.length > 0
-      return Q.reject 'COMPANY_IS_EMPTY'
+    companyHasPeople = contact.children.length > 0
+    companyHasAddress = getVerifiedAddress contact
 
-    companyAddress = getVerifiedAddress contact
-    unless companyAddress
+    if not companyHasPeople and not companyHasAddress
+      return Q.reject 'COMPANY_NO_PEOPLE_NO_ADDRESS'
+
+    unless companyHasPeople
+      return Q.reject 'COMPANY_NO_PEOPLE'
+
+    unless companyHasAddress
       return Q.reject 'COMPANY_ADDRESS_IS_INCOMPLETE'
 
     companyMembers = []
