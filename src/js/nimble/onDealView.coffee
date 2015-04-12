@@ -5,7 +5,7 @@ Q = require 'q'
 getVerifiedAddress = (contact) ->
   if contact.fields?.address?[0]?
     address = JSON.parse contact.fields?.address?[0].value or ""
-    if address.city? and address.zip? and address.street?
+    if address.city? and address.street?
       return address
 
   return null

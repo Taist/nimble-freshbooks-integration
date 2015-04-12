@@ -8,7 +8,7 @@ appData = {};
 appErrors = {
   COMPANY_NOT_FOUND: "Please set a company before creating an estimate",
   COMPANY_IS_EMPTY: "Please link any person to the deal company",
-  COMPANY_ADDRESS_IS_INCOMPLETE: "Company address is incopmlete. Please fill in 'City', 'Zip' and 'Street address'",
+  COMPANY_ADDRESS_IS_INCOMPLETE: "Company address is incopmlete. Please fill in 'City' and 'Street address'",
   NO_MEMBERS_WITH_EMAIL: "Please set email for any company member",
   FB_PROXY_ERROR: "Can't connect to Freshbooks. Please enable its integration with Nimble (My account -> Freshbooks API)"
 };
@@ -361,7 +361,7 @@ getVerifiedAddress = function(contact) {
   var address, ref, ref1, ref2, ref3;
   if (((ref = contact.fields) != null ? (ref1 = ref.address) != null ? ref1[0] : void 0 : void 0) != null) {
     address = JSON.parse(((ref2 = contact.fields) != null ? (ref3 = ref2.address) != null ? ref3[0].value : void 0 : void 0) || "");
-    if ((address.city != null) && (address.zip != null) && (address.street != null)) {
+    if ((address.city != null) && (address.street != null)) {
       return address;
     }
   }

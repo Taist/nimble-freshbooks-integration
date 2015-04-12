@@ -7,7 +7,7 @@ appData = {
 appErrors =
   COMPANY_NOT_FOUND: "Please set a company before creating an estimate"
   COMPANY_IS_EMPTY: "Please link any person to the deal company"
-  COMPANY_ADDRESS_IS_INCOMPLETE: "Company address is incopmlete. Please fill in 'City', 'Zip' and 'Street address'"
+  COMPANY_ADDRESS_IS_INCOMPLETE: "Company address is incopmlete. Please fill in 'City' and 'Street address'"
   NO_MEMBERS_WITH_EMAIL: "Please set email for any company member"
   FB_PROXY_ERROR: "Can't connect to Freshbooks. Please enable its integration with Nimble (My account -> Freshbooks API)"
 
