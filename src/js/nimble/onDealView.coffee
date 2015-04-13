@@ -159,26 +159,27 @@ renderOnDealView = (options = {}) ->
     reactPage = require '../react/nimble/dealView'
     React.render reactPage( reactData ), dealViewContainer
 
-    app.fbAPI.getEstimate dealInfo?.freshBooksEstimateId
-    .then (response) ->
+    if dealInfo?.freshBooksEstimateId?
+      app.fbAPI.getEstimate dealInfo?.freshBooksEstimateId
+      .then (response) ->
 
-      if response?.status is 'ok'
-        console.log response.estimate
-        estimateTableData = {
-          amount: response.estimate?.amount.$t
-          currency: response.estimate?.currency_code.$t
-          number: response.estimate?.number.$t
-          time: (response.estimate?.lines?.line or []).filter (line) ->
-            line?.name?.$t? and line?.type?.$t is 'Time'
-          item: (response.estimate?.lines?.line or []).filter (line) ->
-            line?.name?.$t? and line?.type?.$t isnt 'Time'
-          fbEstimateLink: fbEstimateLink
-        }
-      else
-        estimateTableData = null
+        if response?.status is 'ok'
+          console.log response.estimate
+          estimateTableData = {
+            amount: response.estimate?.amount.$t
+            currency: response.estimate?.currency_code.$t
+            number: response.estimate?.number.$t
+            time: (response.estimate?.lines?.line or []).filter (line) ->
+              line?.name?.$t? and line?.type?.$t is 'Time'
+            item: (response.estimate?.lines?.line or []).filter (line) ->
+              line?.name?.$t? and line?.type?.$t isnt 'Time'
+            fbEstimateLink: fbEstimateLink
+          }
+        else
+          estimateTableData = null
 
-      reactComponent = require '../react/nimble/dealViewEstimateTable'
-      React.render reactComponent( estimateTableData ), dealViewEstimateTable
+        reactComponent = require '../react/nimble/dealViewEstimateTable'
+        React.render reactComponent( estimateTableData ), dealViewEstimateTable
 
   .catch (error) ->
     app.actions.onNimbleError error
