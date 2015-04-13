@@ -180,6 +180,10 @@ renderOnDealView = (options = {}) ->
 
         reactComponent = require '../react/nimble/dealViewEstimateTable'
         React.render reactComponent( estimateTableData ), dealViewEstimateTable
+    else
+      estimateTableData = null
+      reactComponent = require '../react/nimble/dealViewEstimateTable'
+      React.render reactComponent( estimateTableData ), dealViewEstimateTable
 
   .catch (error) ->
     app.actions.onNimbleError error

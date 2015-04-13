@@ -538,7 +538,7 @@ renderOnDealView = function(options) {
     options = {};
   }
   return app.exapi.getCompanyData(app.nimbleAPI.getDealIdFromUrl()).then(function(dealInfo) {
-    var React, fbEstimateLink, reactData, reactPage;
+    var React, estimateTableData, fbEstimateLink, reactComponent, reactData, reactPage;
     fbEstimateLink = app.fbAPI.getEstimateLink(dealInfo != null ? dealInfo.freshBooksEstimateId : void 0);
     React = require('react');
     reactData = {
@@ -574,6 +574,10 @@ renderOnDealView = function(options) {
         reactComponent = require('../react/nimble/dealViewEstimateTable');
         return React.render(reactComponent(estimateTableData), dealViewEstimateTable);
       });
+    } else {
+      estimateTableData = null;
+      reactComponent = require('../react/nimble/dealViewEstimateTable');
+      return React.render(reactComponent(estimateTableData), dealViewEstimateTable);
     }
   })["catch"](function(error) {
     return app.actions.onNimbleError(error);
