@@ -8,8 +8,8 @@ appData = {};
 appErrors = {
   COMPANY_NOT_FOUND: "Please link a company to the deal",
   COMPANY_NO_PEOPLE: "Please link a person to the company linked to the deal",
-  COMPANY_ADDRESS_IS_INCOMPLETE: "Company address is incopmlete. Please fill in 'City' and 'Street address'",
-  COMPANY_NO_PEOPLE_NO_ADDRESS: "Please link a person to a company and fill in company's address: Street address, City and Zip",
+  COMPANY_ADDRESS_IS_INCOMPLETE: "Company address is incopmlete. Please fill in Street address and City",
+  COMPANY_NO_PEOPLE_NO_ADDRESS: "Please link a person to a company and fill in company's address: Street address and City",
   NO_MEMBERS_WITH_EMAIL: "Please set email for the person linked to the company in the deal",
   FB_PROXY_ERROR: "Can't connect to Freshbooks. Please enable its integration with Nimble (My account -> Freshbooks API)"
 };
