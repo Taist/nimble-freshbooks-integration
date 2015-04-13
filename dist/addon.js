@@ -374,7 +374,7 @@ onCreateEstimate = function() {
   currentNimbleContact = null;
   currentFBContact = null;
   return app.nimbleAPI.getDealInfo().then(function(dealInfo) {
-    var companyHasAddress, companyHasPeople, companyMembers, contact, primaryContactId;
+    var companyAddress, companyHasPeople, companyMembers, contact, primaryContactId;
     console.log(dealInfo);
     primaryContactId = dealInfo.deal.related_primary[0];
     if (primaryContactId) {
@@ -384,14 +384,14 @@ onCreateEstimate = function() {
       return Q.reject('COMPANY_NOT_FOUND');
     }
     companyHasPeople = contact.children.length > 0;
-    companyHasAddress = getVerifiedAddress(contact);
-    if (!companyHasPeople && !companyHasAddress) {
+    companyAddress = getVerifiedAddress(contact);
+    if (!companyHasPeople && !companyAddress) {
       return Q.reject('COMPANY_NO_PEOPLE_NO_ADDRESS');
     }
     if (!companyHasPeople) {
       return Q.reject('COMPANY_NO_PEOPLE');
     }
-    if (!companyHasAddress) {
+    if (!companyAddress) {
       return Q.reject('COMPANY_ADDRESS_IS_INCOMPLETE');
     }
     companyMembers = [];
