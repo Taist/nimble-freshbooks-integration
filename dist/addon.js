@@ -549,9 +549,12 @@ renderOnDealView = function(options) {
     };
     reactPage = require('../react/nimble/dealView');
     React.render(reactPage(reactData), dealViewContainer);
+    estimateTableData = null;
+    reactComponent = require('../react/nimble/dealViewEstimateTable');
+    React.render(reactComponent(estimateTableData), dealViewEstimateTable);
     if ((dealInfo != null ? dealInfo.freshBooksEstimateId : void 0) != null) {
       return app.fbAPI.getEstimate(dealInfo != null ? dealInfo.freshBooksEstimateId : void 0).then(function(response) {
-        var estimateTableData, reactComponent, ref, ref1, ref2, ref3, ref4, ref5, ref6;
+        var ref, ref1, ref2, ref3, ref4, ref5, ref6;
         if ((response != null ? response.status : void 0) === 'ok') {
           console.log(response.estimate);
           estimateTableData = {
@@ -568,16 +571,10 @@ renderOnDealView = function(options) {
             }),
             fbEstimateLink: fbEstimateLink
           };
-        } else {
-          estimateTableData = null;
+          reactComponent = require('../react/nimble/dealViewEstimateTable');
+          return React.render(reactComponent(estimateTableData), dealViewEstimateTable);
         }
-        reactComponent = require('../react/nimble/dealViewEstimateTable');
-        return React.render(reactComponent(estimateTableData), dealViewEstimateTable);
       });
-    } else {
-      estimateTableData = null;
-      reactComponent = require('../react/nimble/dealViewEstimateTable');
-      return React.render(reactComponent(estimateTableData), dealViewEstimateTable);
     }
   })["catch"](function(error) {
     return app.actions.onNimbleError(error);

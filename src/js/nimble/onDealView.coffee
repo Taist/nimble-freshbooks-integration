@@ -159,6 +159,10 @@ renderOnDealView = (options = {}) ->
     reactPage = require '../react/nimble/dealView'
     React.render reactPage( reactData ), dealViewContainer
 
+    estimateTableData = null
+    reactComponent = require '../react/nimble/dealViewEstimateTable'
+    React.render reactComponent( estimateTableData ), dealViewEstimateTable
+
     if dealInfo?.freshBooksEstimateId?
       app.fbAPI.getEstimate dealInfo?.freshBooksEstimateId
       .then (response) ->
@@ -175,15 +179,8 @@ renderOnDealView = (options = {}) ->
               line?.name?.$t? and line?.type?.$t isnt 'Time'
             fbEstimateLink: fbEstimateLink
           }
-        else
-          estimateTableData = null
-
-        reactComponent = require '../react/nimble/dealViewEstimateTable'
-        React.render reactComponent( estimateTableData ), dealViewEstimateTable
-    else
-      estimateTableData = null
-      reactComponent = require '../react/nimble/dealViewEstimateTable'
-      React.render reactComponent( estimateTableData ), dealViewEstimateTable
+          reactComponent = require '../react/nimble/dealViewEstimateTable'
+          React.render reactComponent( estimateTableData ), dealViewEstimateTable
 
   .catch (error) ->
     app.actions.onNimbleError error
