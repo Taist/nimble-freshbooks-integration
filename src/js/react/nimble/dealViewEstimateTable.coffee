@@ -2,6 +2,8 @@ React = require 'react'
 
 { div, table, tbody, tr, h2, a } = React.DOM
 
+NimbleButton = require './button'
+
 td = (props, data) ->
   unless props.style?
     props.style = {}
@@ -31,22 +33,14 @@ NimbleDealViewEstimateTable = React.createFactory React.createClass
             tr {},
               td { colSpan: 4 },
                 h2 { style: marginBottom: 12 }, "Estimate: #{@props.number}"
+
               td { colSpan: 3, style: textAlign: 'right' },
                 a {
                   href: @props.fbEstimateLink
                   target: '_blank'
                   style:
                     display: 'inline-block'
-                },
-                  div {
-                    tabIndex: 0
-                    className: "nmbl-Button nmbl-Button-WebkitGecko #{@state.editButtonFocusClass}"
-                    onMouseEnter: => @setState editButtonFocusClass: 'nmbl-Button-focus'
-                    onMouseLeave: => @setState editButtonFocusClass: ''
-                  },
-                    div {
-                      className: 'nmbl-ButtonContent'
-                    }, 'Edit'
+                }, NimbleButton { text: 'Edit estimate', serviceIcon: 'freshbooks' }
 
             if @props.time?.length is 0 and @props.item?.length is 0
               tr {}, td { colSpan: 7, style: textAlign: 'center', fontStyle: 'italic' },
