@@ -124,13 +124,14 @@ onCreateEstimate = ->
       console.log dealId, response
 
       estimateId = response.estimate_id.$t
+
+      fbEstimateLink = app.fbAPI.getEstimateLink estimateId
+      window.open fbEstimateLink, '_blank'
+
       app.exapi.setCompanyData dealId, {
         freshBooksClientId: currentFBContact
         freshBooksEstimateId: estimateId
       }
-
-      fbEstimateLink = app.fbAPI.getEstimateLink estimateId
-      window.open fbEstimateLink, '_blank'
     else
       Q.reject response
 
@@ -143,13 +144,14 @@ onCreateEstimate = ->
 dealViewContainer = null
 dealViewEstimateTable = null
 
+React = require 'react'
+
 renderOnDealView = (options = {}) ->
   app.exapi.getCompanyData app.nimbleAPI.getDealIdFromUrl()
   .then (dealInfo) ->
 
     fbEstimateLink = app.fbAPI.getEstimateLink dealInfo?.freshBooksEstimateId
 
-    React = require 'react'
     reactData = {
       onCreateEstimate,
       fbEstimateLink,

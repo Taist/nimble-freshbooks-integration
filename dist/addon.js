@@ -352,7 +352,7 @@ _listenForRequestFinish = function(request) {
 };
 
 },{}],6:[function(require,module,exports){
-var Q, app, dealViewContainer, dealViewEstimateTable, getVerifiedAddress, onCreateEstimate, renderOnDealView;
+var Q, React, app, dealViewContainer, dealViewEstimateTable, getVerifiedAddress, onCreateEstimate, renderOnDealView;
 
 app = require('../app');
 
@@ -511,12 +511,12 @@ onCreateEstimate = function() {
       dealId = app.nimbleAPI.getDealIdFromUrl();
       console.log(dealId, response);
       estimateId = response.estimate_id.$t;
-      app.exapi.setCompanyData(dealId, {
+      fbEstimateLink = app.fbAPI.getEstimateLink(estimateId);
+      window.open(fbEstimateLink, '_blank');
+      return app.exapi.setCompanyData(dealId, {
         freshBooksClientId: currentFBContact,
         freshBooksEstimateId: estimateId
       });
-      fbEstimateLink = app.fbAPI.getEstimateLink(estimateId);
-      return window.open(fbEstimateLink, '_blank');
     } else {
       return Q.reject(response);
     }
@@ -533,14 +533,15 @@ dealViewContainer = null;
 
 dealViewEstimateTable = null;
 
+React = require('react');
+
 renderOnDealView = function(options) {
   if (options == null) {
     options = {};
   }
   return app.exapi.getCompanyData(app.nimbleAPI.getDealIdFromUrl()).then(function(dealInfo) {
-    var React, estimateTableData, fbEstimateLink, reactComponent, reactData, reactPage;
+    var estimateTableData, fbEstimateLink, reactComponent, reactData, reactPage;
     fbEstimateLink = app.fbAPI.getEstimateLink(dealInfo != null ? dealInfo.freshBooksEstimateId : void 0);
-    React = require('react');
     reactData = {
       onCreateEstimate: onCreateEstimate,
       fbEstimateLink: fbEstimateLink,
