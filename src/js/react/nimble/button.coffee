@@ -9,6 +9,8 @@ NimbleButton = React.createFactory React.createClass
     editButtonFocusClass: ''
 
   render: ->
+    console.log @props
+
     div {
       tabIndex: 0
       className: "nmbl-Button nmbl-Button-WebkitGecko #{@state.editButtonFocusClass}"
@@ -19,7 +21,7 @@ NimbleButton = React.createFactory React.createClass
         className: 'nmbl-ButtonContent'
         style:
           backgroundImage: ServicesIcons.getURL @props.serviceIcon
-          backgroundSize: 'contain'
+          backgroundSize: @props.iconSize and 'contain'
           backgroundRepeat: 'no-repeat'
           paddingLeft: 24
       }, @props.text

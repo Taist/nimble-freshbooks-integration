@@ -4,12 +4,14 @@ React = require 'react'
 
 NimbleButton = require './button'
 
-td = (props, data) ->
+td = () ->
+  props = arguments[0]
+
   unless props.style?
     props.style = {}
 
   props.style.padding = "4px 8px"
-  React.DOM.td props, data
+  React.DOM.td.apply @, arguments
 
 NimbleDealViewEstimateTable = React.createFactory React.createClass
   getInitialState: ->
@@ -35,16 +37,27 @@ NimbleDealViewEstimateTable = React.createFactory React.createClass
                 h2 { style: marginBottom: 12 }, "Estimate: #{@props.number}"
 
               td { colSpan: 3, style: textAlign: 'right' },
-                a {
-                  href: @props.fbEstimateLink
-                  target: '_blank'
-                  style:
-                    display: 'inline-block'
-                }, NimbleButton { text: 'Edit estimate', serviceIcon: 'freshbooks' }
+
+                div { style: display: 'inline-block', marginRight: 10 },
+                  a {
+                    href: @props.fbEstimateLink
+                    target: '_blank'
+                    style:
+                      display: 'inline-block'
+                  },
+                    NimbleButton { text: 'Edit estimate', serviceIcon: 'freshbooks' }
+
+                div { style: display: 'inline-block' },
+                  NimbleButton {
+                    text: 'Create proposal'
+                    serviceIcon: 'bidsketch'
+                    iconSize: 16
+                  }
 
             if @props.time?.length is 0 and @props.item?.length is 0
               tr {}, td { colSpan: 7, style: textAlign: 'center', fontStyle: 'italic' },
                 'Estimate is empty'
+
             if @props.time?.length > 0
               tr { style: fontWeight: 'bold', borderBottom: '1px solid silver', lineHeight: '24px' },
                 td {}, 'Task'
@@ -54,10 +67,13 @@ NimbleDealViewEstimateTable = React.createFactory React.createClass
                 td {}, 'Tax'
                 td {}, 'Tax'
                 td { style: textAlign: 'right' }, 'Line Total'
+
             @props.time.map (line) =>
               @createLine line
+
             if @props.time?.length > 0 and @props.item?.length > 0
               tr {}, td { colSpan: 7, style: height: 2 }, ''
+
             if @props.item?.length > 0
               tr { style: fontWeight: 'bold', borderBottom: '1px solid silver', lineHeight: '24px' },
                 td {}, 'Item'
@@ -67,10 +83,13 @@ NimbleDealViewEstimateTable = React.createFactory React.createClass
                 td {}, 'Tax'
                 td {}, 'Tax'
                 td { style: textAlign: 'right' }, 'Line Total'
+
             @props.item.map (line) =>
               @createLine line
+
             if @props.time?.length > 0 or @props.item?.length > 0
               tr {}, td { colSpan: 7, style: height: 2 }, ''
+
             if @props.time?.length > 0 or @props.item?.length > 0
               tr {},
                 td { colSpan: 6, style: textAlign: 'right', fontWeight: 'bold' },

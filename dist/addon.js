@@ -961,6 +961,7 @@ NimbleButton = React.createFactory(React.createClass({
     };
   },
   render: function() {
+    console.log(this.props);
     return div({
       tabIndex: 0,
       className: "nmbl-Button nmbl-Button-WebkitGecko " + this.state.editButtonFocusClass,
@@ -982,7 +983,7 @@ NimbleButton = React.createFactory(React.createClass({
       className: 'nmbl-ButtonContent',
       style: {
         backgroundImage: ServicesIcons.getURL(this.props.serviceIcon),
-        backgroundSize: 'contain',
+        backgroundSize: this.props.iconSize && 'contain',
         backgroundRepeat: 'no-repeat',
         paddingLeft: 24
       }
@@ -1091,12 +1092,14 @@ ref = React.DOM, div = ref.div, table = ref.table, tbody = ref.tbody, tr = ref.t
 
 NimbleButton = require('./button');
 
-td = function(props, data) {
+td = function() {
+  var props;
+  props = arguments[0];
   if (props.style == null) {
     props.style = {};
   }
   props.style.padding = "4px 8px";
-  return React.DOM.td(props, data);
+  return React.DOM.td.apply(this, arguments);
 };
 
 NimbleDealViewEstimateTable = React.createFactory(React.createClass({
@@ -1142,6 +1145,11 @@ NimbleDealViewEstimateTable = React.createFactory(React.createClass({
       style: {
         textAlign: 'right'
       }
+    }, div({
+      style: {
+        display: 'inline-block',
+        marginRight: 10
+      }
     }, a({
       href: this.props.fbEstimateLink,
       target: '_blank',
@@ -1151,6 +1159,14 @@ NimbleDealViewEstimateTable = React.createFactory(React.createClass({
     }, NimbleButton({
       text: 'Edit estimate',
       serviceIcon: 'freshbooks'
+    }))), div({
+      style: {
+        display: 'inline-block'
+      }
+    }, NimbleButton({
+      text: 'Create proposal',
+      serviceIcon: 'bidsketch',
+      iconSize: 16
     })))), ((ref2 = this.props.time) != null ? ref2.length : void 0) === 0 && ((ref3 = this.props.item) != null ? ref3.length : void 0) === 0 ? tr({}, td({
       colSpan: 7,
       style: {
@@ -1232,7 +1248,8 @@ module.exports = NimbleDealViewEstimateTable;
 var get, getDataImage, getURL, icons;
 
 icons = {
-  freshbooks: 'iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAVlpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IlhNUCBDb3JlIDUuNC4wIj4KICAgPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4KICAgICAgPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIKICAgICAgICAgICAgeG1sbnM6dGlmZj0iaHR0cDovL25zLmFkb2JlLmNvbS90aWZmLzEuMC8iPgogICAgICAgICA8dGlmZjpPcmllbnRhdGlvbj4xPC90aWZmOk9yaWVudGF0aW9uPgogICAgICA8L3JkZjpEZXNjcmlwdGlvbj4KICAgPC9yZGY6UkRGPgo8L3g6eG1wbWV0YT4KTMInWQAAA6hJREFUWAntVs1PE0EUfzPd3XbbbluLCIIkTWxEI8Ya8aBeGqMejIkkGhPwYE+ejHIBQQ8QD8S7xosHQuLBg9h/gKOJkcRwhIOJRjCiRApF2tKPHd/bdrVltx8o4kEnaWZ35jfv93tfswX4P/71CLC/FYD+eCggi3yc/w0Bg5Pt/YrIv+MMojsWgaH4vqgO7BIIEUOnA04PB9UjJaXfiQAZtTtfABZiuggBZ34hRAS9jOoCQFIAZCcHReXAMPYKV+e2JIDypui5GDB2HYkjRaPWIFJeuYPjDxDKwCEzJLfiVDk43bCAwXhHD4j8OOMsoLjRC1fRsF0E7NbWl3NF7z2oqjRCvlNTDQm4M9k+jqGMyUjq9jmM8JlG6s2ZZB4S82nwNjtBCf4k50z+eCH8YLauAIOcsZjbX8xdPUJznzxOfsrAxnoBWg96weWrpNKU1jhic5Wr5unSPDi5b1QwqEuu5wVkUwWDLLOagzR6TWvaHgVaOr3AJWv+j7ZceYE01bvAaBsBIy6v1XMyvraUhdRyFtKr+U2ywSDe1aGChBVvN9D7idPttz7WFFBAchkrlwSUj8R8BlYxtCTCHKpfMshcPhk8QdnWYxPLgCfPhe8/wvcEdoh9CgbiHTEmRLScPIu5/PJ2HWgmQiqqemQmafnc4Tsx3Ok/t4JrX2ndvgaEuE6Xhdm7VMmLc9/AiS3U1qVZCqqcoNYzhf7a4WdTiFlE73XCWgQMxUMhXeSjilosnLUvWfj6PgWUU/9eZy37NffccvDFzeOvxhBEof9mgi0CdD3Xw6Wi99RKlO+2wxooZReIebjRmchvd78ZRnwSyZfKz1kECMYu0YVDuaY+JnK7Nio3Uuu5Sd0/diMyNVEiX9yMtQjAwEcdeGElPqSr9vBmI3bvCvdMH2q6OEa3He4voecJO1zFDTEQb48wwWaYKIDWrPyS50QcCpx8eLnzyTQSpkrkG3bktFYRgcyKHvXulkBr2lqxSdw5q0q7po+19poXDBEvo9c01xw/ItB31xNRfMpM2wHtZbBNwy939eGUtFn8mKy1eDpfd7VencO+TiKavCTCFSTOVT9duWMIiI0GAplcYcYhc/Z0ZOV8yVAl0vpGhNTLafxlkNToayus9oqRgnS2MM45hLq7zvYhPIfGFmof275d3nvP149/Wno0v/tV/+Xnb9D05+0zX98S10GMUN8fCZ95jPBUI4VT32zjCKMG8N9OGI/QZ29hpwU0LvU/8g9F4Ds6hxnMOlAP2wAAAABJRU5ErkJggg=='
+  freshbooks: 'iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAVlpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IlhNUCBDb3JlIDUuNC4wIj4KICAgPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4KICAgICAgPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIKICAgICAgICAgICAgeG1sbnM6dGlmZj0iaHR0cDovL25zLmFkb2JlLmNvbS90aWZmLzEuMC8iPgogICAgICAgICA8dGlmZjpPcmllbnRhdGlvbj4xPC90aWZmOk9yaWVudGF0aW9uPgogICAgICA8L3JkZjpEZXNjcmlwdGlvbj4KICAgPC9yZGY6UkRGPgo8L3g6eG1wbWV0YT4KTMInWQAAA6hJREFUWAntVs1PE0EUfzPd3XbbbluLCIIkTWxEI8Ya8aBeGqMejIkkGhPwYE+ejHIBQQ8QD8S7xosHQuLBg9h/gKOJkcRwhIOJRjCiRApF2tKPHd/bdrVltx8o4kEnaWZ35jfv93tfswX4P/71CLC/FYD+eCggi3yc/w0Bg5Pt/YrIv+MMojsWgaH4vqgO7BIIEUOnA04PB9UjJaXfiQAZtTtfABZiuggBZ34hRAS9jOoCQFIAZCcHReXAMPYKV+e2JIDypui5GDB2HYkjRaPWIFJeuYPjDxDKwCEzJLfiVDk43bCAwXhHD4j8OOMsoLjRC1fRsF0E7NbWl3NF7z2oqjRCvlNTDQm4M9k+jqGMyUjq9jmM8JlG6s2ZZB4S82nwNjtBCf4k50z+eCH8YLauAIOcsZjbX8xdPUJznzxOfsrAxnoBWg96weWrpNKU1jhic5Wr5unSPDi5b1QwqEuu5wVkUwWDLLOagzR6TWvaHgVaOr3AJWv+j7ZceYE01bvAaBsBIy6v1XMyvraUhdRyFtKr+U2ywSDe1aGChBVvN9D7idPttz7WFFBAchkrlwSUj8R8BlYxtCTCHKpfMshcPhk8QdnWYxPLgCfPhe8/wvcEdoh9CgbiHTEmRLScPIu5/PJ2HWgmQiqqemQmafnc4Tsx3Ok/t4JrX2ndvgaEuE6Xhdm7VMmLc9/AiS3U1qVZCqqcoNYzhf7a4WdTiFlE73XCWgQMxUMhXeSjilosnLUvWfj6PgWUU/9eZy37NffccvDFzeOvxhBEof9mgi0CdD3Xw6Wi99RKlO+2wxooZReIebjRmchvd78ZRnwSyZfKz1kECMYu0YVDuaY+JnK7Nio3Uuu5Sd0/diMyNVEiX9yMtQjAwEcdeGElPqSr9vBmI3bvCvdMH2q6OEa3He4voecJO1zFDTEQb48wwWaYKIDWrPyS50QcCpx8eLnzyTQSpkrkG3bktFYRgcyKHvXulkBr2lqxSdw5q0q7po+19poXDBEvo9c01xw/ItB31xNRfMpM2wHtZbBNwy939eGUtFn8mKy1eDpfd7VencO+TiKavCTCFSTOVT9duWMIiI0GAplcYcYhc/Z0ZOV8yVAl0vpGhNTLafxlkNToayus9oqRgnS2MM45hLq7zvYhPIfGFmof275d3nvP149/Wno0v/tV/+Xnb9D05+0zX98S10GMUN8fCZ95jPBUI4VT32zjCKMG8N9OGI/QZ29hpwU0LvU/8g9F4Ds6hxnMOlAP2wAAAABJRU5ErkJggg==',
+  bidsketch: 'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAVlpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IlhNUCBDb3JlIDUuNC4wIj4KICAgPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4KICAgICAgPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIKICAgICAgICAgICAgeG1sbnM6dGlmZj0iaHR0cDovL25zLmFkb2JlLmNvbS90aWZmLzEuMC8iPgogICAgICAgICA8dGlmZjpPcmllbnRhdGlvbj4xPC90aWZmOk9yaWVudGF0aW9uPgogICAgICA8L3JkZjpEZXNjcmlwdGlvbj4KICAgPC9yZGY6UkRGPgo8L3g6eG1wbWV0YT4KTMInWQAAAVxJREFUOBF1k71RAzEQRnVAAUcFiAq4Eo4KDDEBJiG2KwBXADERDohtKjAlHB2oA9QAM7xPs6sRxuzM866+/ZF0GnehseOb+57lAmYwNKlEvIbn77eX3Oih8wXNkXgH8iqaIEEEDetB2mU75ATB7YEgQobztshOtkEf4QnuoNiRB/gVaAftNEA1G3aNkGBuA0u+DqBIyfeiHvixIVtL1Q3qgAM9gZ1G+zae9sbkQvsNpF14gsYv4l5r4oTT7iN82GkJQ9gfoB0yyPewhDNYGLjyreSL7V8hok6QSzaEW/zcYtf0CtXqgOaumSO+UqFXUZMGLtFOLR6ovSIu1l4hmvYpT8OjrVunoRsYYKtEPQFxloDpzv+Z19R8HcCOk6ljzf4NZiYlT9UBJuhYkTsuvMC9adIzqK5Y54E8RQNuBz1MRsQ7mVh/JuWK/RogxYboqUatzdS4hRXNybTifgBU4WW6NSYl1gAAAABJRU5ErkJggg=='
 };
 
 get = function(name) {
