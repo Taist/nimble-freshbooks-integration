@@ -83,6 +83,7 @@ freshBooksAPI =
         method: 'client.list'
     .then (clients) ->
       console.log clients
+      clients
 
   createClient: (client) ->
     sendFBRequest

@@ -99,9 +99,51 @@ module.exports = function() {
 };
 
 },{"../app":1,"../react/bidsketch/apiTokens":11,"react":192}],3:[function(require,module,exports){
-var app, bidsketchAPI;
+var Q, app, bidsketchAPI, sendRequest, sendRequestByProxy, sendRequestStub;
 
 app = null;
+
+Q = require('q');
+
+sendRequestStub = function() {
+  return Q.resolve('BIDSKETCH_PROXY_ERROR');
+};
+
+sendRequestByProxy = function(endPoint, requestData, method) {
+  if (method == null) {
+    method = 'GET';
+  }
+  return bidsketchAPI.getCreds().then(function(creds) {
+    var apiUrl, deferred, options;
+    options = {
+      headers: {
+        Authorization: "Token token=\"" + creds.token + "\""
+      },
+      method: method,
+      data: requestData,
+      dataType: 'text'
+    };
+    deferred = Q.defer();
+    apiUrl = creds.url + "/api/v1/" + endPoint;
+    app.api.proxy.jQueryAjax(apiUrl, '', options, function(error, response) {
+      if (error) {
+        return deferred.reject(error);
+      } else {
+        return deferred.resolve(response.result);
+      }
+    });
+    return deferred.promise;
+  }).then(function(result) {
+    return JSON.parse(result);
+  })["catch"](function(error) {
+    var sendRequest;
+    console.log(error);
+    sendRequest = sendRequestStub;
+    return 'BIDSKETCH_PROXY_ERROR';
+  });
+};
+
+sendRequest = sendRequestByProxy;
 
 bidsketchAPI = {
   setCreds: function(creds) {
@@ -109,6 +151,19 @@ bidsketchAPI = {
   },
   getCreds: function() {
     return app.exapi.getCompanyData('bidsketchCreds');
+  },
+  getClients: function(paramsString) {
+    if (paramsString == null) {
+      paramsString = '';
+    }
+    return sendRequest('clients.json' + paramsString).then(function(clients) {
+      return clients;
+    });
+  },
+  getOneClient: function() {
+    return bidsketchAPI.getClients('?per_page=2').then(function(clients) {
+      return clients != null ? clients[0] : void 0;
+    });
   }
 };
 
@@ -119,7 +174,7 @@ module.exports = {
   }
 };
 
-},{}],4:[function(require,module,exports){
+},{"q":37}],4:[function(require,module,exports){
 var Q, XMLMapping, app, fbAPIServer, freshBooksAPI, parseFBResponse, sendFBRequest, sendFBRequestByProxy, sendFBRequestStub;
 
 app = null;
@@ -230,7 +285,8 @@ freshBooksAPI = {
         method: 'client.list'
       }
     }).then(function(clients) {
-      return console.log(clients);
+      console.log(clients);
+      return clients;
     });
   },
   createClient: function(client) {
