@@ -4,6 +4,6 @@
   "siteName": "Nimble",
   "js": "addon.js",
   "shortDescription": "Embeds estimates from Freshbooks into Deals",
-  "siteRegexp": "(freshbooks|nimble)\\.com",
+  "siteRegexp": "(freshbooks|nimble|bidsketch)\\.com",
   "description": "./addon-description.md"
 }

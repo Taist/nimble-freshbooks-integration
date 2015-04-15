@@ -13,6 +13,9 @@ addonEntry =
     if location.href.match /freshbooks\.com\/apiEnable/i
       require('./freshbooks/onApiEnable')()
 
+    if location.href.match /bidsketch\.com\/account\/api_tokens/i
+      require('./bidsketch/onApiTokens')()
+
     if location.host.match /nimble\.com/i
       app.fbAPI.getCreds()
       .then ->

@@ -32,6 +32,7 @@ app =
 
     require('./freshBooksApi').init app, 'fbAPI'
     require('./nimbleApi').init app, 'nimbleAPI'
+    require('./bidsketchApi').init app, 'bidsketchAPI'
 
   actions:
     onNimbleError: (messageCode) ->
@@ -43,5 +44,8 @@ app =
 
     setFreshBooksCreds: (creds) ->
       app.fbAPI.setCreds creds
+
+    setBidsketchCreds: (creds) ->
+      app.bidsketchAPI.setCreds creds
 
 module.exports = app
