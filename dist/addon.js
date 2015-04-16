@@ -140,7 +140,7 @@ onCreateProposal = function(deal) {
 module.exports = onCreateProposal;
 
 },{"../app":1,"q":41}],4:[function(require,module,exports){
-var Q, app, bidsketchAPI, bidsketchAPIServer, sendRequest, sendRequestByProxy, sendRequestStub;
+var Q, app, bidsketchAPI, bidsketchAPIServer, getLink, sendRequest, sendRequestByProxy, sendRequestStub;
 
 app = null;
 
@@ -184,6 +184,18 @@ sendRequestByProxy = function(endPoint, requestData, method) {
   });
 };
 
+getLink = function(name, id) {
+  var dict;
+  dict = {
+    proposalFees: 'proposal_fees',
+    PDF: 'proposal_preview/export_to_pdf'
+  };
+  if (!id || !bidsketchAPIServer) {
+    return null;
+  }
+  return bidsketchAPIServer + "/" + dict[name] + "/" + id;
+};
+
 sendRequest = sendRequestByProxy;
 
 bidsketchAPIServer = null;
@@ -201,10 +213,10 @@ bidsketchAPI = {
     });
   },
   getProposalFeesLink: function(id) {
-    if (!id || !bidsketchAPIServer) {
-      return null;
-    }
-    return bidsketchAPIServer + "/proposal_fees/" + id;
+    return getLink('proposalFees', id);
+  },
+  getPDFLink: function(id) {
+    return getLink('PDF', id);
   },
   getClients: function(paramsString) {
     if (paramsString == null) {

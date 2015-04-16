@@ -34,6 +34,15 @@ sendRequestByProxy = (endPoint, requestData, method = 'GET') ->
     sendRequest = sendRequestStub
     'BIDSKETCH_PROXY_ERROR'
 
+getLink = (name, id) ->
+  dict =
+    proposalFees: 'proposal_fees'
+    PDF: 'proposal_preview/export_to_pdf'
+
+  if not id or not bidsketchAPIServer
+    return null
+  "#{bidsketchAPIServer}/#{dict[name]}/#{id}"
+
 sendRequest = sendRequestByProxy
 
 bidsketchAPIServer = null
@@ -49,10 +58,9 @@ bidsketchAPI =
         bidsketchAPIServer = creds.url
       creds
 
-  getProposalFeesLink: (id) ->
-    if not id or not bidsketchAPIServer
-      return null
-    "#{bidsketchAPIServer}/proposal_fees/#{id}"
+  getProposalFeesLink: (id) -> getLink 'proposalFees', id
+
+  getPDFLink: (id) -> getLink 'PDF', id
 
   getClients: (paramsString = '') ->
     sendRequest 'clients.json' + paramsString
