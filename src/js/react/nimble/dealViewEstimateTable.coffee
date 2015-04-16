@@ -36,6 +36,7 @@ NimbleDealViewEstimateTable = React.createFactory React.createClass
             color: 'salmon'
             fontStyle: 'italic'
         }, @props.error
+        
       if @props?.amount?
         table { style: width: '100%' },
           tbody {},
@@ -59,6 +60,7 @@ NimbleDealViewEstimateTable = React.createFactory React.createClass
                     text: 'Create proposal'
                     serviceIcon: 'bidsketch'
                     iconSize: 16
+                    onClick: @props.onCreateProposal
                   }
 
             if @props.time?.length is 0 and @props.item?.length is 0

@@ -40,10 +40,21 @@ app =
 
   actions:
     onNimbleError: (messageCode) ->
+      console.log 'onNimbleError'
       require('./nimble/onDealView') {
         alertMessage: app.getError messageCode
         isSpinnerActive: false
       }
+
+    onCreateProposal: () ->
+      require('./bidsketch/onCreateProposal')()
+
+    onCreateEstimate: () ->
+      require('./freshbooks/onCreateEstimate')()
+      .then () ->
+        require('./nimble/onDealView') isSpinnerActive: false
+      .catch (error) ->
+        app.actions.onNimbleError error
 
     setFreshBooksCreds: (creds) ->
       app.fbAPI.setCreds creds
