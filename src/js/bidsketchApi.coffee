@@ -36,12 +36,23 @@ sendRequestByProxy = (endPoint, requestData, method = 'GET') ->
 
 sendRequest = sendRequestByProxy
 
+bidsketchAPIServer = null
+
 bidsketchAPI =
   setCreds: (creds) ->
     app.exapi.setCompanyData 'bidsketchCreds', creds
 
   getCreds: ->
     app.exapi.getCompanyData 'bidsketchCreds'
+    .then (creds) ->
+      if creds and not bidsketchAPIServer
+        bidsketchAPIServer = creds.url
+      creds
+
+  getProposalFeesLink: (id) ->
+    if not id or not bidsketchAPIServer
+      return null
+    "#{bidsketchAPIServer}/proposal_fees/#{id}"
 
   getClients: (paramsString = '') ->
     sendRequest 'clients.json' + paramsString

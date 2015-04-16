@@ -130,14 +130,17 @@ onCreateProposal = function(deal) {
       client_id: client.id
     });
   }).then(function(proposal) {
-    return console.log('onCreateProposal', proposal);
+    console.log('onCreateProposal', proposal, app.bidsketchAPI.getProposalFeesLink(proposal.id));
+    return window.open(app.bidsketchAPI.getProposalFeesLink(proposal.id), '_blank');
+  })["catch"](function(error) {
+    return console.log(error);
   });
 };
 
 module.exports = onCreateProposal;
 
 },{"../app":1,"q":41}],4:[function(require,module,exports){
-var Q, app, bidsketchAPI, sendRequest, sendRequestByProxy, sendRequestStub;
+var Q, app, bidsketchAPI, bidsketchAPIServer, sendRequest, sendRequestByProxy, sendRequestStub;
 
 app = null;
 
@@ -183,12 +186,25 @@ sendRequestByProxy = function(endPoint, requestData, method) {
 
 sendRequest = sendRequestByProxy;
 
+bidsketchAPIServer = null;
+
 bidsketchAPI = {
   setCreds: function(creds) {
     return app.exapi.setCompanyData('bidsketchCreds', creds);
   },
   getCreds: function() {
-    return app.exapi.getCompanyData('bidsketchCreds');
+    return app.exapi.getCompanyData('bidsketchCreds').then(function(creds) {
+      if (creds && !bidsketchAPIServer) {
+        bidsketchAPIServer = creds.url;
+      }
+      return creds;
+    });
+  },
+  getProposalFeesLink: function(id) {
+    if (!id || !bidsketchAPIServer) {
+      return null;
+    }
+    return bidsketchAPIServer + "/proposal_fees/" + id;
   },
   getClients: function(paramsString) {
     if (paramsString == null) {

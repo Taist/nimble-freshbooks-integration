@@ -12,6 +12,9 @@ onCreateProposal = (deal) ->
       client_id: client.id
     }
   .then (proposal) ->
-    console.log 'onCreateProposal', proposal
+    console.log 'onCreateProposal', proposal, app.bidsketchAPI.getProposalFeesLink(proposal.id)
+    window.open app.bidsketchAPI.getProposalFeesLink(proposal.id), '_blank'
+  .catch (error) ->
+    console.log error
 
 module.exports = onCreateProposal
