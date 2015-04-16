@@ -6,8 +6,6 @@ dealViewEstimateTable = null
 React = require 'react'
 
 renderOnDealView = (options = {}) ->
-  console.log 'renderOnDealView', options
-
   app.exapi.getCompanyData app.nimbleAPI.getDealIdFromUrl()
   .then (dealInfo) ->
 
@@ -46,7 +44,16 @@ renderOnDealView = (options = {}) ->
         else
           estimateTableData = { error: app.getError response }
 
-        estimateTableData.onCreateProposal = app.actions.onCreateProposal
+        estimateTableData.onCreateProposal = ->
+          app.actions.onCreateProposal {
+            id: app.nimbleAPI.getDealIdFromUrl()
+            info: dealInfo
+            name: document.querySelector('.dealMainFieldTitle').innerText
+            currency: response.estimate?.currency_code.$t
+            fees:
+              time: estimateTableData.time
+              item: estimateTableData.item
+          }
 
         reactComponent = require '../react/nimble/dealViewEstimateTable'
         React.render reactComponent( estimateTableData ), dealViewEstimateTable

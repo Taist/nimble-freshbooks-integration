@@ -12,7 +12,7 @@ sendRequestByProxy = (endPoint, requestData, method = 'GET') ->
       headers:
         Authorization: "Token token=\"#{creds.token}\""
       method: method
-      data: requestData
+      data: JSON.stringify requestData
       dataType: 'text'
 
     deferred = Q.defer()
@@ -45,13 +45,15 @@ bidsketchAPI =
 
   getClients: (paramsString = '') ->
     sendRequest 'clients.json' + paramsString
-    .then (clients) ->
-      clients
 
   getOneClient: () ->
-    bidsketchAPI.getClients '?per_page=2'
+    bidsketchAPI.getClients '?per_page=1'
     .then (clients) ->
       clients?[0]
+
+  createProposal: (data) ->
+    console.log data
+    sendRequest 'proposals.json', data, 'POST'
 
 module.exports =
   init: (_app, propertyName) ->

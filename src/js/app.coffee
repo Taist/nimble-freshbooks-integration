@@ -46,8 +46,8 @@ app =
         isSpinnerActive: false
       }
 
-    onCreateProposal: () ->
-      require('./bidsketch/onCreateProposal')()
+    onCreateProposal: (deal) ->
+      require('./bidsketch/onCreateProposal') deal
 
     onCreateEstimate: () ->
       require('./freshbooks/onCreateEstimate')()

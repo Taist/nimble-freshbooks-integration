@@ -43,8 +43,8 @@ app = {
         isSpinnerActive: false
       });
     },
-    onCreateProposal: function() {
-      return require('./bidsketch/onCreateProposal')();
+    onCreateProposal: function(deal) {
+      return require('./bidsketch/onCreateProposal')(deal);
     },
     onCreateEstimate: function() {
       return require('./freshbooks/onCreateEstimate')().then(function() {
@@ -115,17 +115,26 @@ module.exports = function() {
 };
 
 },{"../app":1,"../react/bidsketch/apiTokens":13,"react":196}],3:[function(require,module,exports){
-var Q, app, onCreateEstimate;
+var Q, app, onCreateProposal;
 
 app = require('../app');
 
 Q = require('q');
 
-onCreateEstimate = function() {
-  return console.log('onCreateProposal');
+onCreateProposal = function(deal) {
+  return app.bidsketchAPI.getOneClient().then(function(client) {
+    return app.bidsketchAPI.createProposal({
+      name: deal.name,
+      description: deal.name,
+      currency: deal.currency,
+      client_id: client.id
+    });
+  }).then(function(proposal) {
+    return console.log('onCreateProposal', proposal);
+  });
 };
 
-module.exports = onCreateEstimate;
+module.exports = onCreateProposal;
 
 },{"../app":1,"q":41}],4:[function(require,module,exports){
 var Q, app, bidsketchAPI, sendRequest, sendRequestByProxy, sendRequestStub;
@@ -149,7 +158,7 @@ sendRequestByProxy = function(endPoint, requestData, method) {
         Authorization: "Token token=\"" + creds.token + "\""
       },
       method: method,
-      data: requestData,
+      data: JSON.stringify(requestData),
       dataType: 'text'
     };
     deferred = Q.defer();
@@ -185,14 +194,16 @@ bidsketchAPI = {
     if (paramsString == null) {
       paramsString = '';
     }
-    return sendRequest('clients.json' + paramsString).then(function(clients) {
-      return clients;
-    });
+    return sendRequest('clients.json' + paramsString);
   },
   getOneClient: function() {
-    return bidsketchAPI.getClients('?per_page=2').then(function(clients) {
+    return bidsketchAPI.getClients('?per_page=1').then(function(clients) {
       return clients != null ? clients[0] : void 0;
     });
+  },
+  createProposal: function(data) {
+    console.log(data);
+    return sendRequest('proposals.json', data, 'POST');
   }
 };
 
@@ -698,7 +709,6 @@ renderOnDealView = function(options) {
   if (options == null) {
     options = {};
   }
-  console.log('renderOnDealView', options);
   return app.exapi.getCompanyData(app.nimbleAPI.getDealIdFromUrl()).then(function(dealInfo) {
     var estimateTableData, fbEstimateLink, reactComponent, reactData, reactPage;
     fbEstimateLink = app.fbAPI.getEstimateLink(dealInfo != null ? dealInfo.freshBooksEstimateId : void 0);
@@ -736,7 +746,19 @@ renderOnDealView = function(options) {
             error: app.getError(response)
           };
         }
-        estimateTableData.onCreateProposal = app.actions.onCreateProposal;
+        estimateTableData.onCreateProposal = function() {
+          var ref7;
+          return app.actions.onCreateProposal({
+            id: app.nimbleAPI.getDealIdFromUrl(),
+            info: dealInfo,
+            name: document.querySelector('.dealMainFieldTitle').innerText,
+            currency: (ref7 = response.estimate) != null ? ref7.currency_code.$t : void 0,
+            fees: {
+              time: estimateTableData.time,
+              item: estimateTableData.item
+            }
+          });
+        };
         reactComponent = require('../react/nimble/dealViewEstimateTable');
         return React.render(reactComponent(estimateTableData), dealViewEstimateTable);
       });
