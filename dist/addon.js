@@ -11,7 +11,8 @@ appErrors = {
   COMPANY_ADDRESS_IS_INCOMPLETE: "Company address is incopmlete. Please fill in Street address and City",
   COMPANY_NO_PEOPLE_NO_ADDRESS: "Please link a person to a company and fill in company's address: Street address and City",
   NO_MEMBERS_WITH_EMAIL: "Please set email for the person linked to the company in the deal",
-  FB_PROXY_ERROR: "Can't connect to Freshbooks. Please enable its integration with Nimble (My account -> Freshbooks API)"
+  FB_PROXY_ERROR: "Can't connect to Freshbooks. Please enable its integration with Nimble (My account -> Freshbooks API)",
+  BIDSKETCH_PROXY_ERROR: "Can't connect to Bidsketch. Please enable its integration with Nimble"
 };
 
 app = {
@@ -31,11 +32,13 @@ app = {
     require('./nimbleApi').init(app, 'nimbleAPI');
     return require('./bidsketchApi').init(app, 'bidsketchAPI');
   },
+  getError: function(messageCode) {
+    return appErrors[messageCode];
+  },
   actions: {
     onNimbleError: function(messageCode) {
-      console.log('onNimbleError', messageCode);
       return require('./nimble/onDealView')({
-        alertMessage: appErrors[messageCode],
+        alertMessage: app.getError(messageCode),
         isSpinnerActive: false
       });
     },
@@ -701,9 +704,13 @@ renderOnDealView = function(options) {
             }),
             fbEstimateLink: fbEstimateLink
           };
-          reactComponent = require('../react/nimble/dealViewEstimateTable');
-          return React.render(reactComponent(estimateTableData), dealViewEstimateTable);
+        } else {
+          estimateTableData = {
+            error: app.getError(response)
+          };
         }
+        reactComponent = require('../react/nimble/dealViewEstimateTable');
+        return React.render(reactComponent(estimateTableData), dealViewEstimateTable);
       });
     }
   })["catch"](function(error) {
@@ -961,6 +968,7 @@ NimbleButton = React.createFactory(React.createClass({
     };
   },
   render: function() {
+    var ref;
     console.log(this.props);
     return div({
       tabIndex: 0,
@@ -983,7 +991,7 @@ NimbleButton = React.createFactory(React.createClass({
       className: 'nmbl-ButtonContent',
       style: {
         backgroundImage: ServicesIcons.getURL(this.props.serviceIcon),
-        backgroundSize: this.props.iconSize && 'contain',
+        backgroundSize: (ref = this.props.iconSize) != null ? ref : 'contain',
         backgroundRepeat: 'no-repeat',
         paddingLeft: 24
       }
@@ -1129,8 +1137,14 @@ NimbleDealViewEstimateTable = React.createFactory(React.createClass({
     }, line.amount.$t));
   },
   render: function() {
-    var ref1, ref10, ref11, ref2, ref3, ref4, ref5, ref6, ref7, ref8, ref9;
-    return div({}, ((ref1 = this.props) != null ? ref1.amount : void 0) != null ? table({
+    var ref1, ref10, ref11, ref12, ref2, ref3, ref4, ref5, ref6, ref7, ref8, ref9;
+    return div({}, ((ref1 = this.props) != null ? ref1.error : void 0) != null ? div({
+      style: {
+        textAlign: 'center',
+        color: 'salmon',
+        fontStyle: 'italic'
+      }
+    }, this.props.error) : void 0, ((ref2 = this.props) != null ? ref2.amount : void 0) != null ? table({
       style: {
         width: '100%'
       }
@@ -1167,13 +1181,13 @@ NimbleDealViewEstimateTable = React.createFactory(React.createClass({
       text: 'Create proposal',
       serviceIcon: 'bidsketch',
       iconSize: 16
-    })))), ((ref2 = this.props.time) != null ? ref2.length : void 0) === 0 && ((ref3 = this.props.item) != null ? ref3.length : void 0) === 0 ? tr({}, td({
+    })))), ((ref3 = this.props.time) != null ? ref3.length : void 0) === 0 && ((ref4 = this.props.item) != null ? ref4.length : void 0) === 0 ? tr({}, td({
       colSpan: 7,
       style: {
         textAlign: 'center',
         fontStyle: 'italic'
       }
-    }, 'Estimate is empty')) : void 0, ((ref4 = this.props.time) != null ? ref4.length : void 0) > 0 ? tr({
+    }, 'Estimate is empty')) : void 0, ((ref5 = this.props.time) != null ? ref5.length : void 0) > 0 ? tr({
       style: {
         fontWeight: 'bold',
         borderBottom: '1px solid silver',
@@ -1195,12 +1209,12 @@ NimbleDealViewEstimateTable = React.createFactory(React.createClass({
       return function(line) {
         return _this.createLine(line);
       };
-    })(this)), ((ref5 = this.props.time) != null ? ref5.length : void 0) > 0 && ((ref6 = this.props.item) != null ? ref6.length : void 0) > 0 ? tr({}, td({
+    })(this)), ((ref6 = this.props.time) != null ? ref6.length : void 0) > 0 && ((ref7 = this.props.item) != null ? ref7.length : void 0) > 0 ? tr({}, td({
       colSpan: 7,
       style: {
         height: 2
       }
-    }, '')) : void 0, ((ref7 = this.props.item) != null ? ref7.length : void 0) > 0 ? tr({
+    }, '')) : void 0, ((ref8 = this.props.item) != null ? ref8.length : void 0) > 0 ? tr({
       style: {
         fontWeight: 'bold',
         borderBottom: '1px solid silver',
@@ -1222,12 +1236,12 @@ NimbleDealViewEstimateTable = React.createFactory(React.createClass({
       return function(line) {
         return _this.createLine(line);
       };
-    })(this)), ((ref8 = this.props.time) != null ? ref8.length : void 0) > 0 || ((ref9 = this.props.item) != null ? ref9.length : void 0) > 0 ? tr({}, td({
+    })(this)), ((ref9 = this.props.time) != null ? ref9.length : void 0) > 0 || ((ref10 = this.props.item) != null ? ref10.length : void 0) > 0 ? tr({}, td({
       colSpan: 7,
       style: {
         height: 2
       }
-    }, '')) : void 0, ((ref10 = this.props.time) != null ? ref10.length : void 0) > 0 || ((ref11 = this.props.item) != null ? ref11.length : void 0) > 0 ? tr({}, td({
+    }, '')) : void 0, ((ref11 = this.props.time) != null ? ref11.length : void 0) > 0 || ((ref12 = this.props.item) != null ? ref12.length : void 0) > 0 ? tr({}, td({
       colSpan: 6,
       style: {
         textAlign: 'right',

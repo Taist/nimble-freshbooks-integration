@@ -29,6 +29,13 @@ NimbleDealViewEstimateTable = React.createFactory React.createClass
 
   render: ->
     div {},
+      if @props?.error?
+        div {
+          style:
+            textAlign: 'center'
+            color: 'salmon'
+            fontStyle: 'italic'
+        }, @props.error
       if @props?.amount?
         table { style: width: '100%' },
           tbody {},

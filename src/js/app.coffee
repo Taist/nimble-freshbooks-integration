@@ -11,6 +11,7 @@ appErrors =
   COMPANY_NO_PEOPLE_NO_ADDRESS: "Please link a person to a company and fill in company's address: Street address and City"
   NO_MEMBERS_WITH_EMAIL: "Please set email for the person linked to the company in the deal"
   FB_PROXY_ERROR: "Can't connect to Freshbooks. Please enable its integration with Nimble (My account -> Freshbooks API)"
+  BIDSKETCH_PROXY_ERROR: "Can't connect to Bidsketch. Please enable its integration with Nimble"
 
 app =
   api: null
@@ -34,11 +35,13 @@ app =
     require('./nimbleApi').init app, 'nimbleAPI'
     require('./bidsketchApi').init app, 'bidsketchAPI'
 
+  getError: (messageCode) ->
+    appErrors[messageCode]
+
   actions:
     onNimbleError: (messageCode) ->
-      console.log 'onNimbleError', messageCode
       require('./nimble/onDealView') {
-        alertMessage: appErrors[messageCode]
+        alertMessage: app.getError messageCode
         isSpinnerActive: false
       }
 

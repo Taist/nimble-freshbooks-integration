@@ -181,8 +181,11 @@ renderOnDealView = (options = {}) ->
               line?.name?.$t? and line?.type?.$t isnt 'Time'
             fbEstimateLink: fbEstimateLink
           }
-          reactComponent = require '../react/nimble/dealViewEstimateTable'
-          React.render reactComponent( estimateTableData ), dealViewEstimateTable
+        else
+          estimateTableData = { error: app.getError response }
+
+        reactComponent = require '../react/nimble/dealViewEstimateTable'
+        React.render reactComponent( estimateTableData ), dealViewEstimateTable
 
   .catch (error) ->
     app.actions.onNimbleError error

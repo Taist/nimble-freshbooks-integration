@@ -21,7 +21,7 @@ NimbleButton = React.createFactory React.createClass
         className: 'nmbl-ButtonContent'
         style:
           backgroundImage: ServicesIcons.getURL @props.serviceIcon
-          backgroundSize: @props.iconSize and 'contain'
+          backgroundSize: @props.iconSize ? 'contain'
           backgroundRepeat: 'no-repeat'
           paddingLeft: 24
       }, @props.text
