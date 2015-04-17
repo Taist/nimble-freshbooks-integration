@@ -1,5 +1,7 @@
 Q = require 'q'
 
+require('react/lib/DOMProperty').ID_ATTRIBUTE_NAME = 'data-vrnfb-reactid'
+
 appData = {
 
 }
@@ -40,7 +42,7 @@ app =
 
   actions:
     onNimbleError: (messageCode) ->
-      console.log 'onNimbleError'
+      console.log 'onNimbleError', messageCode
       require('./nimble/onDealView') {
         alertMessage: app.getError messageCode
         isSpinnerActive: false

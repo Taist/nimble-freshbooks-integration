@@ -3,6 +3,8 @@ var Q, app, appData, appErrors;
 
 Q = require('q');
 
+require('react/lib/DOMProperty').ID_ATTRIBUTE_NAME = 'data-vrnfb-reactid';
+
 appData = {};
 
 appErrors = {
@@ -37,7 +39,7 @@ app = {
   },
   actions: {
     onNimbleError: function(messageCode) {
-      console.log('onNimbleError');
+      console.log('onNimbleError', messageCode);
       return require('./nimble/onDealView')({
         alertMessage: app.getError(messageCode),
         isSpinnerActive: false
@@ -66,7 +68,7 @@ app = {
 
 module.exports = app;
 
-},{"./bidsketch/onCreateProposal":3,"./bidsketchApi":4,"./freshBooksApi":5,"./freshbooks/onCreateEstimate":7,"./nimble/onDealView":10,"./nimbleApi":12,"q":41}],2:[function(require,module,exports){
+},{"./bidsketch/onCreateProposal":3,"./bidsketchApi":4,"./freshBooksApi":5,"./freshbooks/onCreateEstimate":7,"./nimble/onDealView":10,"./nimbleApi":12,"q":41,"react/lib/DOMProperty":50}],2:[function(require,module,exports){
 var app, getOnPageCreds, onSetCreds;
 
 app = require('../app');
@@ -457,13 +459,13 @@ onCreateEstimate = function() {
   currentNimbleContact = null;
   currentFBContact = null;
   return app.nimbleAPI.getDealInfo().then(function(dealInfo) {
-    var companyAddress, companyHasPeople, companyMembers, contact, primaryContactId;
+    var companyAddress, companyHasPeople, companyMembers, contact, primaryContactId, ref;
     console.log(dealInfo);
-    primaryContactId = dealInfo.deal.related_primary[0];
+    primaryContactId = (ref = dealInfo.deal.related_primary) != null ? ref[0] : void 0;
     if (primaryContactId) {
       contact = dealInfo.contacts[primaryContactId];
     }
-    if (contact.record_type !== 'company') {
+    if ((contact != null ? contact.record_type : void 0) !== 'company') {
       return Q.reject('COMPANY_NOT_FOUND');
     }
     companyHasPeople = contact.children.length > 0;
@@ -481,14 +483,14 @@ onCreateEstimate = function() {
     return Q.all(contact.children.map(function(memberId) {
       return app.nimbleAPI.getContactById(memberId);
     })).then(function(companyMembersInfo) {
-      var ref;
+      var ref1;
       companyMembers = companyMembersInfo.map(function(memberInfo) {
-        var member, ref, ref1, ref2, ref3, ref4, ref5;
+        var member, ref1, ref2, ref3, ref4, ref5, ref6;
         member = memberInfo.resources[0];
         return {
-          first_name: (ref = member.fields['first name']) != null ? (ref1 = ref[0]) != null ? ref1.value : void 0 : void 0,
-          last_name: (ref2 = member.fields['last name']) != null ? (ref3 = ref2[0]) != null ? ref3.value : void 0 : void 0,
-          email: (ref4 = member.fields['email']) != null ? (ref5 = ref4[0]) != null ? ref5.value : void 0 : void 0
+          first_name: (ref1 = member.fields['first name']) != null ? (ref2 = ref1[0]) != null ? ref2.value : void 0 : void 0,
+          last_name: (ref3 = member.fields['last name']) != null ? (ref4 = ref3[0]) != null ? ref4.value : void 0 : void 0,
+          email: (ref5 = member.fields['email']) != null ? (ref6 = ref5[0]) != null ? ref6.value : void 0 : void 0
         };
       });
       companyMembers.sort(function(a, b) {
@@ -498,7 +500,7 @@ onCreateEstimate = function() {
           return 0;
         }
       });
-      if (!((ref = companyMembers[0]) != null ? ref.email : void 0)) {
+      if (!((ref1 = companyMembers[0]) != null ? ref1.email : void 0)) {
         return Q.reject('NO_MEMBERS_WITH_EMAIL');
       } else {
         return Q.resolve(companyMembers);
@@ -506,7 +508,7 @@ onCreateEstimate = function() {
     }).then(function(companyMembers) {
       return app.exapi.getCompanyData(primaryContactId);
     }).then(function(linkedClient) {
-      var additionalContacts, client, firstPerson, ref, ref1;
+      var additionalContacts, client, firstPerson, ref1, ref2;
       console.log(companyMembers);
       if (!linkedClient) {
         currentNimbleContact = contact;
@@ -522,7 +524,7 @@ onCreateEstimate = function() {
             $t: firstPerson.email
           },
           organization: {
-            $t: (ref = contact.fields['company name']) != null ? (ref1 = ref[0]) != null ? ref1.value : void 0 : void 0
+            $t: (ref1 = contact.fields['company name']) != null ? (ref2 = ref1[0]) != null ? ref2.value : void 0 : void 0
           },
           p_street1: {
             $t: companyAddress.street

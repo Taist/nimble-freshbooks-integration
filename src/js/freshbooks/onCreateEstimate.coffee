@@ -19,11 +19,11 @@ onCreateEstimate = ->
 
     console.log dealInfo
 
-    primaryContactId = dealInfo.deal.related_primary[0]
+    primaryContactId = dealInfo.deal.related_primary?[0]
     if primaryContactId
       contact = dealInfo.contacts[primaryContactId]
 
-    unless contact.record_type is 'company'
+    unless contact?.record_type is 'company'
       return Q.reject 'COMPANY_NOT_FOUND'
 
     companyHasPeople = contact.children.length > 0

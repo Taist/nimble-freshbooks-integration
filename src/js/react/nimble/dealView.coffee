@@ -49,7 +49,7 @@ NimbleDealViewPage = React.createFactory React.createClass
           },
             div { className: 'gwt-Label' }, @state.alertMessage
             div { className: 'closeOrange', onClick: @onCloseAlert }
-      div { style: marginTop: 4},
+      div { style: marginTop: 4 },
         unless @props.fbEstimateLink?
           a {
             href: 'javascript:void(0)'
