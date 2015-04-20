@@ -2,6 +2,8 @@ app = require './app'
 
 React = require 'react'
 
+Q = require 'q'
+
 addonEntry =
   start: (_taistApi, entryPoint) ->
     window._app = app
@@ -17,7 +19,10 @@ addonEntry =
       require('./bidsketch/onApiTokens')()
 
     if location.host.match /nimble\.com/i
-      app.fbAPI.getCreds()
+      Q.all [
+        app.fbAPI.getCreds()
+        app.bidsketchAPI.getCreds()    
+      ]
       .then ->
         require('./nimble/onNimble')()
 

@@ -36,17 +36,17 @@ NimbleDealViewEstimateTable = React.createFactory React.createClass
             color: 'salmon'
             fontStyle: 'italic'
         }, @props.error
-        
+
       if @props?.amount?
         table { style: width: '100%' },
           tbody {},
             tr {},
-              td { colSpan: 4 },
+              td { colSpan: 3 },
                 h2 { style: marginBottom: 12 }, "Estimate: #{@props.number}"
 
-              td { colSpan: 3, style: textAlign: 'right' },
+              td { colSpan: 4, style: textAlign: 'right' },
 
-                div { style: display: 'inline-block', marginRight: 10 },
+                div { style: display: 'inline-block' },
                   a {
                     href: @props.fbEstimateLink
                     target: '_blank'
@@ -55,13 +55,32 @@ NimbleDealViewEstimateTable = React.createFactory React.createClass
                   },
                     NimbleButton { text: 'Edit estimate', serviceIcon: 'freshbooks' }
 
-                div { style: display: 'inline-block' },
-                  NimbleButton {
-                    text: 'Create proposal'
-                    serviceIcon: 'bidsketch'
-                    iconSize: 16
-                    onClick: @props.onCreateProposal
-                  }
+                unless @props?.bidsketchProposalViewLink?
+                  div { style: display: 'inline-block', marginLeft: 10 },
+                    NimbleButton {
+                      text: 'Create proposal'
+                      serviceIcon: 'bidsketch'
+                      iconSize: 16
+                      onClick: @props.onCreateProposal
+                    }
+                else
+                  div { style: display: 'inline-block', marginLeft: 10 },
+                    a {
+                      href: @props.bidsketchProposalEditLink
+                      target: '_blank'
+                      style:
+                        display: 'inline-block'
+                    },
+                      NimbleButton { text: 'Edit proposal', serviceIcon: 'bidsketch', iconSize: 16 }
+
+                    a {
+                      href: @props.bidsketchProposalViewLink
+                      target: '_blank'
+                      style:
+                        display: 'inline-block'
+                        marginLeft: 10
+                    },
+                      NimbleButton { text: 'View proposal', serviceIcon: 'pdf', iconSize: 17 }
 
             if @props.time?.length is 0 and @props.item?.length is 0
               tr {}, td { colSpan: 7, style: textAlign: 'center', fontStyle: 'italic' },

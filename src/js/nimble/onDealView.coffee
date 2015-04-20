@@ -10,6 +10,8 @@ renderOnDealView = (options = {}) ->
   .then (dealInfo) ->
 
     fbEstimateLink = app.fbAPI.getEstimateLink dealInfo?.freshBooksEstimateId
+    bidsketchProposalViewLink = app.bidsketchAPI.getPDFLink dealInfo.bidsketchProposalId
+    bidsketchProposalEditLink = app.bidsketchAPI.getProposalOpeningSectionsLink dealInfo.bidsketchProposalId
 
     reactData = {
       onCreateEstimate: app.actions.onCreateEstimate
@@ -37,10 +39,14 @@ renderOnDealView = (options = {}) ->
             item: (response.estimate?.lines?.line or []).filter (line) ->
               line?.name?.$t? and line?.type?.$t isnt 'Time'
             fbEstimateLink: fbEstimateLink
+            bidsketchProposalViewLink: bidsketchProposalViewLink
+            bidsketchProposalEditLink: bidsketchProposalEditLink
           }
 
         else
           estimateTableData = { error: app.getError response }
+
+        console.log estimateTableData
 
         estimateTableData.onCreateProposal = ->
           app.actions.onCreateProposal {

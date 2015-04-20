@@ -134,11 +134,17 @@ onCreateProposal = function(deal) {
       client_id: client.id
     });
   }).then(function(proposal) {
-    if (proposal === 'BIDSKETCH_PROXY_ERROR') {
-      return Q.reject('BIDSKETCH_PROXY_ERROR');
+    var dealId;
+    if ((proposal != null ? proposal.id : void 0) == null) {
+      return Q.reject(proposal);
     }
-    console.log('onCreateProposal', proposal, app.bidsketchAPI.getProposalFeesLink(proposal.id));
-    return window.open(app.bidsketchAPI.getProposalFeesLink(proposal.id), '_blank');
+    console.log('onCreateProposal', proposal);
+    dealId = app.nimbleAPI.getDealIdFromUrl();
+    deal.info.bidsketchProposalId = proposal.id;
+    app.exapi.setCompanyData(dealId, deal.info);
+    return proposal;
+  }).then(function(proposal) {
+    return window.open(app.bidsketchAPI.getProposalOpeningSectionsLink(proposal.id), '_blank');
   });
 };
 
@@ -196,6 +202,7 @@ getLink = function(name, id) {
   var dict;
   dict = {
     proposalFees: 'proposal_fees',
+    openingSections: 'opening_sections',
     PDF: 'proposal_preview/export_to_pdf'
   };
   if (!id || !bidsketchAPIServer) {
@@ -222,6 +229,9 @@ bidsketchAPI = {
   },
   getProposalFeesLink: function(id) {
     return getLink('proposalFees', id);
+  },
+  getProposalOpeningSectionsLink: function(id) {
+    return getLink('openingSections', id);
   },
   getPDFLink: function(id) {
     return getLink('PDF', id);
@@ -746,8 +756,10 @@ renderOnDealView = function(options) {
     options = {};
   }
   return app.exapi.getCompanyData(app.nimbleAPI.getDealIdFromUrl()).then(function(dealInfo) {
-    var estimateTableData, fbEstimateLink, reactComponent, reactData, reactPage;
+    var bidsketchProposalEditLink, bidsketchProposalViewLink, estimateTableData, fbEstimateLink, reactComponent, reactData, reactPage;
     fbEstimateLink = app.fbAPI.getEstimateLink(dealInfo != null ? dealInfo.freshBooksEstimateId : void 0);
+    bidsketchProposalViewLink = app.bidsketchAPI.getPDFLink(dealInfo.bidsketchProposalId);
+    bidsketchProposalEditLink = app.bidsketchAPI.getProposalOpeningSectionsLink(dealInfo.bidsketchProposalId);
     reactData = {
       onCreateEstimate: app.actions.onCreateEstimate,
       fbEstimateLink: fbEstimateLink,
@@ -773,13 +785,16 @@ renderOnDealView = function(options) {
               var ref5, ref6;
               return ((line != null ? (ref5 = line.name) != null ? ref5.$t : void 0 : void 0) != null) && (line != null ? (ref6 = line.type) != null ? ref6.$t : void 0 : void 0) !== 'Time';
             }),
-            fbEstimateLink: fbEstimateLink
+            fbEstimateLink: fbEstimateLink,
+            bidsketchProposalViewLink: bidsketchProposalViewLink,
+            bidsketchProposalEditLink: bidsketchProposalEditLink
           };
         } else {
           estimateTableData = {
             error: app.getError(response)
           };
         }
+        console.log(estimateTableData);
         estimateTableData.onCreateProposal = function() {
           var ref7;
           return app.actions.onCreateProposal({
@@ -1228,7 +1243,7 @@ NimbleDealViewEstimateTable = React.createFactory(React.createClass({
     }, line.amount.$t));
   },
   render: function() {
-    var ref1, ref10, ref11, ref12, ref2, ref3, ref4, ref5, ref6, ref7, ref8, ref9;
+    var ref1, ref10, ref11, ref12, ref13, ref2, ref3, ref4, ref5, ref6, ref7, ref8, ref9;
     return div({}, ((ref1 = this.props) != null ? ref1.error : void 0) != null ? div({
       style: {
         textAlign: 'center',
@@ -1240,20 +1255,19 @@ NimbleDealViewEstimateTable = React.createFactory(React.createClass({
         width: '100%'
       }
     }, tbody({}, tr({}, td({
-      colSpan: 4
+      colSpan: 3
     }, h2({
       style: {
         marginBottom: 12
       }
     }, "Estimate: " + this.props.number)), td({
-      colSpan: 3,
+      colSpan: 4,
       style: {
         textAlign: 'right'
       }
     }, div({
       style: {
-        display: 'inline-block',
-        marginRight: 10
+        display: 'inline-block'
       }
     }, a({
       href: this.props.fbEstimateLink,
@@ -1264,22 +1278,49 @@ NimbleDealViewEstimateTable = React.createFactory(React.createClass({
     }, NimbleButton({
       text: 'Edit estimate',
       serviceIcon: 'freshbooks'
-    }))), div({
+    }))), ((ref3 = this.props) != null ? ref3.bidsketchProposalViewLink : void 0) == null ? div({
       style: {
-        display: 'inline-block'
+        display: 'inline-block',
+        marginLeft: 10
       }
     }, NimbleButton({
       text: 'Create proposal',
       serviceIcon: 'bidsketch',
       iconSize: 16,
       onClick: this.props.onCreateProposal
-    })))), ((ref3 = this.props.time) != null ? ref3.length : void 0) === 0 && ((ref4 = this.props.item) != null ? ref4.length : void 0) === 0 ? tr({}, td({
+    })) : div({
+      style: {
+        display: 'inline-block',
+        marginLeft: 10
+      }
+    }, a({
+      href: this.props.bidsketchProposalEditLink,
+      target: '_blank',
+      style: {
+        display: 'inline-block'
+      }
+    }, NimbleButton({
+      text: 'Edit proposal',
+      serviceIcon: 'bidsketch',
+      iconSize: 16
+    })), a({
+      href: this.props.bidsketchProposalViewLink,
+      target: '_blank',
+      style: {
+        display: 'inline-block',
+        marginLeft: 10
+      }
+    }, NimbleButton({
+      text: 'View proposal',
+      serviceIcon: 'pdf',
+      iconSize: 17
+    }))))), ((ref4 = this.props.time) != null ? ref4.length : void 0) === 0 && ((ref5 = this.props.item) != null ? ref5.length : void 0) === 0 ? tr({}, td({
       colSpan: 7,
       style: {
         textAlign: 'center',
         fontStyle: 'italic'
       }
-    }, 'Estimate is empty')) : void 0, ((ref5 = this.props.time) != null ? ref5.length : void 0) > 0 ? tr({
+    }, 'Estimate is empty')) : void 0, ((ref6 = this.props.time) != null ? ref6.length : void 0) > 0 ? tr({
       style: {
         fontWeight: 'bold',
         borderBottom: '1px solid silver',
@@ -1301,12 +1342,12 @@ NimbleDealViewEstimateTable = React.createFactory(React.createClass({
       return function(line) {
         return _this.createLine(line);
       };
-    })(this)), ((ref6 = this.props.time) != null ? ref6.length : void 0) > 0 && ((ref7 = this.props.item) != null ? ref7.length : void 0) > 0 ? tr({}, td({
+    })(this)), ((ref7 = this.props.time) != null ? ref7.length : void 0) > 0 && ((ref8 = this.props.item) != null ? ref8.length : void 0) > 0 ? tr({}, td({
       colSpan: 7,
       style: {
         height: 2
       }
-    }, '')) : void 0, ((ref8 = this.props.item) != null ? ref8.length : void 0) > 0 ? tr({
+    }, '')) : void 0, ((ref9 = this.props.item) != null ? ref9.length : void 0) > 0 ? tr({
       style: {
         fontWeight: 'bold',
         borderBottom: '1px solid silver',
@@ -1328,12 +1369,12 @@ NimbleDealViewEstimateTable = React.createFactory(React.createClass({
       return function(line) {
         return _this.createLine(line);
       };
-    })(this)), ((ref9 = this.props.time) != null ? ref9.length : void 0) > 0 || ((ref10 = this.props.item) != null ? ref10.length : void 0) > 0 ? tr({}, td({
+    })(this)), ((ref10 = this.props.time) != null ? ref10.length : void 0) > 0 || ((ref11 = this.props.item) != null ? ref11.length : void 0) > 0 ? tr({}, td({
       colSpan: 7,
       style: {
         height: 2
       }
-    }, '')) : void 0, ((ref11 = this.props.time) != null ? ref11.length : void 0) > 0 || ((ref12 = this.props.item) != null ? ref12.length : void 0) > 0 ? tr({}, td({
+    }, '')) : void 0, ((ref12 = this.props.time) != null ? ref12.length : void 0) > 0 || ((ref13 = this.props.item) != null ? ref13.length : void 0) > 0 ? tr({}, td({
       colSpan: 6,
       style: {
         textAlign: 'right',
@@ -1355,7 +1396,8 @@ var get, getDataImage, getURL, icons;
 
 icons = {
   freshbooks: 'iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAVlpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IlhNUCBDb3JlIDUuNC4wIj4KICAgPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4KICAgICAgPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIKICAgICAgICAgICAgeG1sbnM6dGlmZj0iaHR0cDovL25zLmFkb2JlLmNvbS90aWZmLzEuMC8iPgogICAgICAgICA8dGlmZjpPcmllbnRhdGlvbj4xPC90aWZmOk9yaWVudGF0aW9uPgogICAgICA8L3JkZjpEZXNjcmlwdGlvbj4KICAgPC9yZGY6UkRGPgo8L3g6eG1wbWV0YT4KTMInWQAAA6hJREFUWAntVs1PE0EUfzPd3XbbbluLCIIkTWxEI8Ya8aBeGqMejIkkGhPwYE+ejHIBQQ8QD8S7xosHQuLBg9h/gKOJkcRwhIOJRjCiRApF2tKPHd/bdrVltx8o4kEnaWZ35jfv93tfswX4P/71CLC/FYD+eCggi3yc/w0Bg5Pt/YrIv+MMojsWgaH4vqgO7BIIEUOnA04PB9UjJaXfiQAZtTtfABZiuggBZ34hRAS9jOoCQFIAZCcHReXAMPYKV+e2JIDypui5GDB2HYkjRaPWIFJeuYPjDxDKwCEzJLfiVDk43bCAwXhHD4j8OOMsoLjRC1fRsF0E7NbWl3NF7z2oqjRCvlNTDQm4M9k+jqGMyUjq9jmM8JlG6s2ZZB4S82nwNjtBCf4k50z+eCH8YLauAIOcsZjbX8xdPUJznzxOfsrAxnoBWg96weWrpNKU1jhic5Wr5unSPDi5b1QwqEuu5wVkUwWDLLOagzR6TWvaHgVaOr3AJWv+j7ZceYE01bvAaBsBIy6v1XMyvraUhdRyFtKr+U2ywSDe1aGChBVvN9D7idPttz7WFFBAchkrlwSUj8R8BlYxtCTCHKpfMshcPhk8QdnWYxPLgCfPhe8/wvcEdoh9CgbiHTEmRLScPIu5/PJ2HWgmQiqqemQmafnc4Tsx3Ok/t4JrX2ndvgaEuE6Xhdm7VMmLc9/AiS3U1qVZCqqcoNYzhf7a4WdTiFlE73XCWgQMxUMhXeSjilosnLUvWfj6PgWUU/9eZy37NffccvDFzeOvxhBEof9mgi0CdD3Xw6Wi99RKlO+2wxooZReIebjRmchvd78ZRnwSyZfKz1kECMYu0YVDuaY+JnK7Nio3Uuu5Sd0/diMyNVEiX9yMtQjAwEcdeGElPqSr9vBmI3bvCvdMH2q6OEa3He4voecJO1zFDTEQb48wwWaYKIDWrPyS50QcCpx8eLnzyTQSpkrkG3bktFYRgcyKHvXulkBr2lqxSdw5q0q7po+19poXDBEvo9c01xw/ItB31xNRfMpM2wHtZbBNwy939eGUtFn8mKy1eDpfd7VencO+TiKavCTCFSTOVT9duWMIiI0GAplcYcYhc/Z0ZOV8yVAl0vpGhNTLafxlkNToayus9oqRgnS2MM45hLq7zvYhPIfGFmof275d3nvP149/Wno0v/tV/+Xnb9D05+0zX98S10GMUN8fCZ95jPBUI4VT32zjCKMG8N9OGI/QZ29hpwU0LvU/8g9F4Ds6hxnMOlAP2wAAAABJRU5ErkJggg==',
-  bidsketch: 'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAVlpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IlhNUCBDb3JlIDUuNC4wIj4KICAgPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4KICAgICAgPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIKICAgICAgICAgICAgeG1sbnM6dGlmZj0iaHR0cDovL25zLmFkb2JlLmNvbS90aWZmLzEuMC8iPgogICAgICAgICA8dGlmZjpPcmllbnRhdGlvbj4xPC90aWZmOk9yaWVudGF0aW9uPgogICAgICA8L3JkZjpEZXNjcmlwdGlvbj4KICAgPC9yZGY6UkRGPgo8L3g6eG1wbWV0YT4KTMInWQAAAVxJREFUOBF1k71RAzEQRnVAAUcFiAq4Eo4KDDEBJiG2KwBXADERDohtKjAlHB2oA9QAM7xPs6sRxuzM866+/ZF0GnehseOb+57lAmYwNKlEvIbn77eX3Oih8wXNkXgH8iqaIEEEDetB2mU75ATB7YEgQobztshOtkEf4QnuoNiRB/gVaAftNEA1G3aNkGBuA0u+DqBIyfeiHvixIVtL1Q3qgAM9gZ1G+zae9sbkQvsNpF14gsYv4l5r4oTT7iN82GkJQ9gfoB0yyPewhDNYGLjyreSL7V8hok6QSzaEW/zcYtf0CtXqgOaumSO+UqFXUZMGLtFOLR6ovSIu1l4hmvYpT8OjrVunoRsYYKtEPQFxloDpzv+Z19R8HcCOk6ljzf4NZiYlT9UBJuhYkTsuvMC9adIzqK5Y54E8RQNuBz1MRsQ7mVh/JuWK/RogxYboqUatzdS4hRXNybTifgBU4WW6NSYl1gAAAABJRU5ErkJggg=='
+  bidsketch: 'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAVlpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IlhNUCBDb3JlIDUuNC4wIj4KICAgPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4KICAgICAgPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIKICAgICAgICAgICAgeG1sbnM6dGlmZj0iaHR0cDovL25zLmFkb2JlLmNvbS90aWZmLzEuMC8iPgogICAgICAgICA8dGlmZjpPcmllbnRhdGlvbj4xPC90aWZmOk9yaWVudGF0aW9uPgogICAgICA8L3JkZjpEZXNjcmlwdGlvbj4KICAgPC9yZGY6UkRGPgo8L3g6eG1wbWV0YT4KTMInWQAAAVxJREFUOBF1k71RAzEQRnVAAUcFiAq4Eo4KDDEBJiG2KwBXADERDohtKjAlHB2oA9QAM7xPs6sRxuzM866+/ZF0GnehseOb+57lAmYwNKlEvIbn77eX3Oih8wXNkXgH8iqaIEEEDetB2mU75ATB7YEgQobztshOtkEf4QnuoNiRB/gVaAftNEA1G3aNkGBuA0u+DqBIyfeiHvixIVtL1Q3qgAM9gZ1G+zae9sbkQvsNpF14gsYv4l5r4oTT7iN82GkJQ9gfoB0yyPewhDNYGLjyreSL7V8hok6QSzaEW/zcYtf0CtXqgOaumSO+UqFXUZMGLtFOLR6ovSIu1l4hmvYpT8OjrVunoRsYYKtEPQFxloDpzv+Z19R8HcCOk6ljzf4NZiYlT9UBJuhYkTsuvMC9adIzqK5Y54E8RQNuBz1MRsQ7mVh/JuWK/RogxYboqUatzdS4hRXNybTifgBU4WW6NSYl1gAAAABJRU5ErkJggg==',
+  pdf: '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'
 };
 
 get = function(name) {
@@ -29351,11 +29393,13 @@ XMLWriter.prototype = {
 module.exports = XMLWriter;
 
 },{}],"addon":[function(require,module,exports){
-var React, addonEntry, app;
+var Q, React, addonEntry, app;
 
 app = require('./app');
 
 React = require('react');
+
+Q = require('q');
 
 addonEntry = {
   start: function(_taistApi, entryPoint) {
@@ -29371,7 +29415,7 @@ addonEntry = {
       require('./bidsketch/onApiTokens')();
     }
     if (location.host.match(/nimble\.com/i)) {
-      app.fbAPI.getCreds().then(function() {
+      Q.all([app.fbAPI.getCreds(), app.bidsketchAPI.getCreds()]).then(function() {
         return require('./nimble/onNimble')();
       });
     }
@@ -29381,5 +29425,5 @@ addonEntry = {
 
 module.exports = addonEntry;
 
-},{"./app":1,"./bidsketch/onApiTokens":2,"./freshbooks/onApiEnable":6,"./helpers/domObserver":8,"./nimble/onNimble":11,"react":196}]},{},[]);
+},{"./app":1,"./bidsketch/onApiTokens":2,"./freshbooks/onApiEnable":6,"./helpers/domObserver":8,"./nimble/onNimble":11,"q":41,"react":196}]},{},[]);
 ;return require("addon")}

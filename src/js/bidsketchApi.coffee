@@ -40,6 +40,7 @@ sendRequestByProxy = (endPoint, requestData, method = 'GET') ->
 getLink = (name, id) ->
   dict =
     proposalFees: 'proposal_fees'
+    openingSections: 'opening_sections'
     PDF: 'proposal_preview/export_to_pdf'
 
   if not id or not bidsketchAPIServer
@@ -62,6 +63,8 @@ bidsketchAPI =
       creds
 
   getProposalFeesLink: (id) -> getLink 'proposalFees', id
+
+  getProposalOpeningSectionsLink: (id) -> getLink 'openingSections', id
 
   getPDFLink: (id) -> getLink 'PDF', id
 
