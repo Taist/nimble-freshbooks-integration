@@ -46,7 +46,9 @@ app = {
       });
     },
     onCreateProposal: function(deal) {
-      return require('./bidsketch/onCreateProposal')(deal);
+      return require('./bidsketch/onCreateProposal')(deal)["catch"](function(error) {
+        return app.actions.onNimbleError(error);
+      });
     },
     onCreateEstimate: function() {
       return require('./freshbooks/onCreateEstimate')().then(function() {
@@ -132,10 +134,11 @@ onCreateProposal = function(deal) {
       client_id: client.id
     });
   }).then(function(proposal) {
+    if (proposal === 'BIDSKETCH_PROXY_ERROR') {
+      return Q.reject('BIDSKETCH_PROXY_ERROR');
+    }
     console.log('onCreateProposal', proposal, app.bidsketchAPI.getProposalFeesLink(proposal.id));
     return window.open(app.bidsketchAPI.getProposalFeesLink(proposal.id), '_blank');
-  })["catch"](function(error) {
-    return console.log(error);
   });
 };
 
@@ -158,6 +161,9 @@ sendRequestByProxy = function(endPoint, requestData, method) {
   }
   return bidsketchAPI.getCreds().then(function(creds) {
     var apiUrl, deferred, options;
+    if (!creds) {
+      return Q.reject('No creds for bidsketch');
+    }
     options = {
       headers: {
         Authorization: "Token token=\"" + creds.token + "\""
@@ -232,7 +238,7 @@ bidsketchAPI = {
     });
   },
   createProposal: function(data) {
-    console.log(data);
+    console.log('createProposal', data);
     return sendRequest('proposals.json', data, 'POST');
   }
 };
@@ -751,11 +757,9 @@ renderOnDealView = function(options) {
     reactPage = require('../react/nimble/dealView');
     React.render(reactPage(reactData), dealViewContainer);
     estimateTableData = null;
-    reactComponent = require('../react/nimble/dealViewEstimateTable');
-    React.render(reactComponent(estimateTableData), dealViewEstimateTable);
     if ((dealInfo != null ? dealInfo.freshBooksEstimateId : void 0) != null) {
       return app.fbAPI.getEstimate(dealInfo != null ? dealInfo.freshBooksEstimateId : void 0).then(function(response) {
-        var ref, ref1, ref2, ref3, ref4, ref5, ref6;
+        var reactComponent, ref, ref1, ref2, ref3, ref4, ref5, ref6;
         if ((response != null ? response.status : void 0) === 'ok') {
           estimateTableData = {
             amount: (ref = response.estimate) != null ? ref.amount.$t : void 0,
@@ -792,6 +796,9 @@ renderOnDealView = function(options) {
         reactComponent = require('../react/nimble/dealViewEstimateTable');
         return React.render(reactComponent(estimateTableData), dealViewEstimateTable);
       });
+    } else {
+      reactComponent = require('../react/nimble/dealViewEstimateTable');
+      return React.render(reactComponent(estimateTableData), dealViewEstimateTable);
     }
   })["catch"](function(error) {
     return app.actions.onNimbleError(error);

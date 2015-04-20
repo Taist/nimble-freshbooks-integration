@@ -12,9 +12,10 @@ onCreateProposal = (deal) ->
       client_id: client.id
     }
   .then (proposal) ->
+    if proposal is 'BIDSKETCH_PROXY_ERROR'
+      return Q.reject 'BIDSKETCH_PROXY_ERROR'
+
     console.log 'onCreateProposal', proposal, app.bidsketchAPI.getProposalFeesLink(proposal.id)
     window.open app.bidsketchAPI.getProposalFeesLink(proposal.id), '_blank'
-  .catch (error) ->
-    console.log error
 
 module.exports = onCreateProposal

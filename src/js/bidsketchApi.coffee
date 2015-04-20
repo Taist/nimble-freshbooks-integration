@@ -8,6 +8,9 @@ sendRequestStub = () ->
 sendRequestByProxy = (endPoint, requestData, method = 'GET') ->
   bidsketchAPI.getCreds()
   .then (creds) ->
+    unless creds
+      return Q.reject 'No creds for bidsketch'
+
     options =
       headers:
         Authorization: "Token token=\"#{creds.token}\""
@@ -71,7 +74,7 @@ bidsketchAPI =
       clients?[0]
 
   createProposal: (data) ->
-    console.log data
+    console.log 'createProposal', data
     sendRequest 'proposals.json', data, 'POST'
 
 module.exports =
