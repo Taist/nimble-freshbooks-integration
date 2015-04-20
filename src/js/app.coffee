@@ -50,8 +50,8 @@ app =
 
     onCreateProposal: (deal) ->
       require('./bidsketch/onCreateProposal') deal
-      # .then () ->
-      #   require('./nimble/onDealView') isSpinnerActive: false
+      .then () ->
+        require('./nimble/onDealView') isSpinnerActive: false
       .catch (error) ->
         app.actions.onNimbleError error
 

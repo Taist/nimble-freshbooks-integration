@@ -76,9 +76,16 @@ bidsketchAPI =
     .then (clients) ->
       clients?[0]
 
+  getProposal: (id) ->
+    sendRequest "proposals/#{id}/content.json"
+
   createProposal: (data) ->
-    console.log 'createProposal', data
+    # console.log 'createProposal', data
     sendRequest 'proposals.json', data, 'POST'
+
+  createFee: (proposalId, data) ->
+    # console.log 'createFee', data
+    sendRequest "proposals/#{proposalId}/fees.json", data, 'POST'
 
 module.exports =
   init: (_app, propertyName) ->

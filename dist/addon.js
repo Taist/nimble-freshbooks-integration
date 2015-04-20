@@ -46,7 +46,11 @@ app = {
       });
     },
     onCreateProposal: function(deal) {
-      return require('./bidsketch/onCreateProposal')(deal)["catch"](function(error) {
+      return require('./bidsketch/onCreateProposal')(deal).then(function() {
+        return require('./nimble/onDealView')({
+          isSpinnerActive: false
+        });
+      })["catch"](function(error) {
         return app.actions.onNimbleError(error);
       });
     },
@@ -119,11 +123,23 @@ module.exports = function() {
 };
 
 },{"../app":1,"../react/bidsketch/apiTokens":13,"react":196}],3:[function(require,module,exports){
-var Q, app, onCreateProposal;
+var Q, app, onCreateProposal, prepareFee;
 
 app = require('../app');
 
 Q = require('q');
+
+prepareFee = function(fee, type) {
+  var ref;
+  return {
+    name: fee.name.$t,
+    description: (ref = fee.description.$t) != null ? ref : fee.name.$t,
+    feetype: type,
+    amount: fee.unit_cost.$t,
+    quantity: fee.quantity.$t,
+    unit: type === 'custom' ? 'Product' : void 0
+  };
+};
 
 onCreateProposal = function(deal) {
   return app.bidsketchAPI.getOneClient().then(function(client) {
@@ -134,15 +150,30 @@ onCreateProposal = function(deal) {
       client_id: client.id
     });
   }).then(function(proposal) {
-    var dealId;
+    var fees;
     if ((proposal != null ? proposal.id : void 0) == null) {
       return Q.reject(proposal);
     }
     console.log('onCreateProposal', proposal);
-    dealId = app.nimbleAPI.getDealIdFromUrl();
-    deal.info.bidsketchProposalId = proposal.id;
-    app.exapi.setCompanyData(dealId, deal.info);
-    return proposal;
+    fees = deal.fees.item.map(function(fee) {
+      return function() {
+        return app.bidsketchAPI.createFee(proposal.id, prepareFee(fee, 'custom'));
+      };
+    });
+    fees = fees.concat(deal.fees.time.map(function(fee) {
+      return function() {
+        return app.bidsketchAPI.createFee(proposal.id, prepareFee(fee, 'hourly'));
+      };
+    }));
+    return Q.all(fees.map(function(f) {
+      return f();
+    })).then(function() {
+      var dealId;
+      dealId = app.nimbleAPI.getDealIdFromUrl();
+      deal.info.bidsketchProposalId = proposal.id;
+      app.exapi.setCompanyData(dealId, deal.info);
+      return proposal;
+    });
   }).then(function(proposal) {
     return window.open(app.bidsketchAPI.getProposalOpeningSectionsLink(proposal.id), '_blank');
   });
@@ -247,9 +278,14 @@ bidsketchAPI = {
       return clients != null ? clients[0] : void 0;
     });
   },
+  getProposal: function(id) {
+    return sendRequest("proposals/" + id + "/content.json");
+  },
   createProposal: function(data) {
-    console.log('createProposal', data);
     return sendRequest('proposals.json', data, 'POST');
+  },
+  createFee: function(proposalId, data) {
+    return sendRequest("proposals/" + proposalId + "/fees.json", data, 'POST');
   }
 };
 
@@ -758,8 +794,8 @@ renderOnDealView = function(options) {
   return app.exapi.getCompanyData(app.nimbleAPI.getDealIdFromUrl()).then(function(dealInfo) {
     var bidsketchProposalEditLink, bidsketchProposalViewLink, estimateTableData, fbEstimateLink, reactComponent, reactData, reactPage;
     fbEstimateLink = app.fbAPI.getEstimateLink(dealInfo != null ? dealInfo.freshBooksEstimateId : void 0);
-    bidsketchProposalViewLink = app.bidsketchAPI.getPDFLink(dealInfo.bidsketchProposalId);
-    bidsketchProposalEditLink = app.bidsketchAPI.getProposalOpeningSectionsLink(dealInfo.bidsketchProposalId);
+    bidsketchProposalViewLink = app.bidsketchAPI.getPDFLink(dealInfo != null ? dealInfo.bidsketchProposalId : void 0);
+    bidsketchProposalEditLink = app.bidsketchAPI.getProposalOpeningSectionsLink(dealInfo != null ? dealInfo.bidsketchProposalId : void 0);
     reactData = {
       onCreateEstimate: app.actions.onCreateEstimate,
       fbEstimateLink: fbEstimateLink,

@@ -10,8 +10,8 @@ renderOnDealView = (options = {}) ->
   .then (dealInfo) ->
 
     fbEstimateLink = app.fbAPI.getEstimateLink dealInfo?.freshBooksEstimateId
-    bidsketchProposalViewLink = app.bidsketchAPI.getPDFLink dealInfo.bidsketchProposalId
-    bidsketchProposalEditLink = app.bidsketchAPI.getProposalOpeningSectionsLink dealInfo.bidsketchProposalId
+    bidsketchProposalViewLink = app.bidsketchAPI.getPDFLink dealInfo?.bidsketchProposalId
+    bidsketchProposalEditLink = app.bidsketchAPI.getProposalOpeningSectionsLink dealInfo?.bidsketchProposalId
 
     reactData = {
       onCreateEstimate: app.actions.onCreateEstimate
