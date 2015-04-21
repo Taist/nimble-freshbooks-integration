@@ -51,4 +51,4 @@ module.exports = (dealInfo) ->
     unless companyMembers[0]?.email
       return Q.reject 'NO_MEMBERS_WITH_EMAIL'
     else
-      return Q.resolve { companyAddress, companyMembers, primaryContactId, contact }
+      return Q.resolve { companyAddress, companyMembers, contact }

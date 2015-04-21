@@ -12,14 +12,12 @@ onCreateEstimate = ->
     require('../nimble/prepareCompanyInfo') dealInfo
 
   .then (companyInfo) ->
-    { companyAddress, companyMembers, primaryContactId, contact } = companyInfo
+    { companyAddress, companyMembers, contact } = companyInfo
 
-    app.exapi.getCompanyData primaryContactId
+    app.exapi.getCompanyData contact.id
 
     .then (linkedClient) ->
-      console.log companyMembers
-
-      unless linkedClient
+      unless linkedClient?.freshBooksClientId?
         currentNimbleContact = contact
 
         firstPerson = companyMembers.shift()
@@ -74,7 +72,6 @@ onCreateEstimate = ->
 
     if response.status is 'ok'
       dealId = app.nimbleAPI.getDealIdFromUrl()
-      console.log dealId, response
 
       estimateId = response.estimate_id.$t
 

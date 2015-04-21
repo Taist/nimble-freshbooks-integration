@@ -154,12 +154,49 @@ prepareFee = function(fee, type) {
 };
 
 onCreateProposal = function(deal) {
-  return app.bidsketchAPI.getOneClient().then(function(client) {
+  return app.nimbleAPI.getDealInfo().then(function(dealInfo) {
+    return require('../nimble/prepareCompanyInfo')(dealInfo);
+  }).then(function(companyInfo) {
+    var companyAddress, companyMembers, contact;
+    companyAddress = companyInfo.companyAddress, companyMembers = companyInfo.companyMembers, contact = companyInfo.contact;
+    return app.exapi.getCompanyData(contact.id).then(function(linkedClient) {
+      var client, firstPerson, ref, ref1;
+      if ((linkedClient != null ? linkedClient.bidsketchClientId : void 0) == null) {
+        firstPerson = companyMembers.shift();
+        client = {
+          first_name: firstPerson.first_name,
+          last_name: firstPerson.last_name,
+          email: firstPerson.email,
+          name: (ref = contact.fields['company name']) != null ? (ref1 = ref[0]) != null ? ref1.value : void 0 : void 0,
+          address_field_one: companyAddress.street,
+          city: companyAddress.city,
+          state: companyAddress.state,
+          country: companyAddress.country,
+          postal_zip: companyAddress.zip
+        };
+        return app.bidsketchAPI.createClient(client).then(function(response) {
+          var clientId;
+          if ((response != null ? response.id : void 0) != null) {
+            clientId = response.id;
+            return app.exapi.updateCompanyData(contact.id, {
+              bidsketchClientId: clientId
+            }).then(function() {
+              return Q.resolve(clientId);
+            });
+          } else {
+            return Q.reject(response);
+          }
+        });
+      } else {
+        return Q.resolve(linkedClient.bidsketchClientId);
+      }
+    });
+  }).then(function(clientId) {
     return app.bidsketchAPI.createProposal({
       name: deal.name,
       description: deal.name,
       currency: deal.currency,
-      client_id: client.id
+      client_id: clientId
     });
   }).then(function(proposal) {
     var fees;
@@ -194,7 +231,7 @@ onCreateProposal = function(deal) {
 
 module.exports = onCreateProposal;
 
-},{"../app":1,"q":42}],4:[function(require,module,exports){
+},{"../app":1,"../nimble/prepareCompanyInfo":12,"q":42}],4:[function(require,module,exports){
 var Q, app, bidsketchAPI, bidsketchAPIServer, getLink, sendRequest, sendRequestByProxy, sendRequestStub;
 
 app = null;
@@ -518,12 +555,11 @@ onCreateEstimate = function() {
   return app.nimbleAPI.getDealInfo().then(function(dealInfo) {
     return require('../nimble/prepareCompanyInfo')(dealInfo);
   }).then(function(companyInfo) {
-    var companyAddress, companyMembers, contact, primaryContactId;
-    companyAddress = companyInfo.companyAddress, companyMembers = companyInfo.companyMembers, primaryContactId = companyInfo.primaryContactId, contact = companyInfo.contact;
-    return app.exapi.getCompanyData(primaryContactId).then(function(linkedClient) {
+    var companyAddress, companyMembers, contact;
+    companyAddress = companyInfo.companyAddress, companyMembers = companyInfo.companyMembers, contact = companyInfo.contact;
+    return app.exapi.getCompanyData(contact.id).then(function(linkedClient) {
       var additionalContacts, client, firstPerson, ref, ref1;
-      console.log(companyMembers);
-      if (!linkedClient) {
+      if ((linkedClient != null ? linkedClient.freshBooksClientId : void 0) == null) {
         currentNimbleContact = contact;
         firstPerson = companyMembers.shift();
         client = {
@@ -608,7 +644,6 @@ onCreateEstimate = function() {
     var dealId, estimateId, fbEstimateLink;
     if (response.status === 'ok') {
       dealId = app.nimbleAPI.getDealIdFromUrl();
-      console.log(dealId, response);
       estimateId = response.estimate_id.$t;
       fbEstimateLink = app.fbAPI.getEstimateLink(estimateId);
       window.open(fbEstimateLink, '_blank');
@@ -940,7 +975,6 @@ module.exports = function(dealInfo) {
       return Q.resolve({
         companyAddress: companyAddress,
         companyMembers: companyMembers,
-        primaryContactId: primaryContactId,
         contact: contact
       });
     }

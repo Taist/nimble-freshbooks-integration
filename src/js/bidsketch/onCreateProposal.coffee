@@ -11,14 +11,52 @@ prepareFee = (fee, type) ->
   unit: 'Product' if type is 'custom'
 
 onCreateProposal = (deal) ->
-  app.bidsketchAPI.getOneClient()
+  app.nimbleAPI.getDealInfo()
 
-  .then (client) ->
+  .then (dealInfo) ->
+    require('../nimble/prepareCompanyInfo') dealInfo
+
+  .then (companyInfo) ->
+    { companyAddress, companyMembers, contact } = companyInfo
+
+    app.exapi.getCompanyData contact.id
+    .then (linkedClient) ->
+      unless linkedClient?.bidsketchClientId?
+        # currentNimbleContact = contact
+
+        firstPerson = companyMembers.shift()
+        client =
+          first_name: firstPerson.first_name
+          last_name: firstPerson.last_name
+          email: firstPerson.email
+          name: contact.fields['company name']?[0]?.value
+
+          address_field_one: companyAddress.street
+          city: companyAddress.city
+          state: companyAddress.state
+          country: companyAddress.country
+          postal_zip: companyAddress.zip
+
+        app.bidsketchAPI.createClient client
+        .then (response) ->
+          if response?.id?
+            clientId = response.id
+            app.exapi.updateCompanyData contact.id, { bidsketchClientId: clientId }
+              .then ->
+                Q.resolve clientId
+          else
+            Q.reject response
+
+      else
+        Q.resolve linkedClient.bidsketchClientId
+
+  .then (clientId) ->
+
     app.bidsketchAPI.createProposal {
       name: deal.name
       description: deal.name
       currency: deal.currency
-      client_id: client.id
+      client_id: clientId
     }
 
   .then (proposal) ->
