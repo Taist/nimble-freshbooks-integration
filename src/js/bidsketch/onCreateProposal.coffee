@@ -36,8 +36,7 @@ onCreateProposal = (deal) ->
     Q.all( fees.map (f) -> f() )
     .then () ->
       dealId = app.nimbleAPI.getDealIdFromUrl()
-      deal.info.bidsketchProposalId = proposal.id
-      app.exapi.setCompanyData dealId, deal.info
+      app.exapi.updateCompanyData dealId, { bidsketchProposalId: proposal.id }
 
       proposal
 

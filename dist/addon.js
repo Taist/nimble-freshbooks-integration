@@ -1,9 +1,11 @@
 function init(){var require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-var Q, app, appData, appErrors;
+var Q, app, appData, appErrors, extend;
 
 Q = require('q');
 
 require('react/lib/DOMProperty').ID_ATTRIBUTE_NAME = 'data-vrnfb-reactid';
+
+extend = require('react/lib/Object.assign');
 
 appData = {};
 
@@ -30,6 +32,16 @@ app = {
     app.exapi.getUserData = Q.nbind(api.userData.get, api.userData);
     app.exapi.setCompanyData = Q.nbind(api.companyData.set, api.companyData);
     app.exapi.getCompanyData = Q.nbind(api.companyData.get, api.companyData);
+    app.exapi.updateCompanyData = function(key, newData) {
+      return app.exapi.getCompanyData(key).then(function(storedData) {
+        var updatedData;
+        updatedData = {};
+        extend(updatedData, storedData, newData);
+        return app.exapi.setCompanyData(key, updatedData).then(function() {
+          return updatedData;
+        });
+      });
+    };
     require('./freshBooksApi').init(app, 'fbAPI');
     require('./nimbleApi').init(app, 'nimbleAPI');
     return require('./bidsketchApi').init(app, 'bidsketchAPI');
@@ -74,7 +86,7 @@ app = {
 
 module.exports = app;
 
-},{"./bidsketch/onCreateProposal":3,"./bidsketchApi":4,"./freshBooksApi":5,"./freshbooks/onCreateEstimate":7,"./nimble/onDealView":10,"./nimbleApi":13,"q":42,"react/lib/DOMProperty":51}],2:[function(require,module,exports){
+},{"./bidsketch/onCreateProposal":3,"./bidsketchApi":4,"./freshBooksApi":5,"./freshbooks/onCreateEstimate":7,"./nimble/onDealView":10,"./nimbleApi":13,"q":42,"react/lib/DOMProperty":51,"react/lib/Object.assign":68}],2:[function(require,module,exports){
 var app, getOnPageCreds, onSetCreds;
 
 app = require('../app');
@@ -170,8 +182,9 @@ onCreateProposal = function(deal) {
     })).then(function() {
       var dealId;
       dealId = app.nimbleAPI.getDealIdFromUrl();
-      deal.info.bidsketchProposalId = proposal.id;
-      app.exapi.setCompanyData(dealId, deal.info);
+      app.exapi.updateCompanyData(dealId, {
+        bidsketchProposalId: proposal.id
+      });
       return proposal;
     });
   }).then(function(proposal) {
@@ -567,7 +580,7 @@ onCreateEstimate = function() {
           var clientId;
           if (response.status === 'ok') {
             clientId = response.client_id.$t;
-            return app.exapi.setCompanyData(currentNimbleContact.id, {
+            return app.exapi.updateCompanyData(currentNimbleContact.id, {
               freshBooksClientId: clientId
             }).then(function() {
               return Q.resolve(clientId);
@@ -599,7 +612,7 @@ onCreateEstimate = function() {
       estimateId = response.estimate_id.$t;
       fbEstimateLink = app.fbAPI.getEstimateLink(estimateId);
       window.open(fbEstimateLink, '_blank');
-      return app.exapi.setCompanyData(dealId, {
+      return app.exapi.updateCompanyData(dealId, {
         freshBooksClientId: currentFBContact,
         freshBooksEstimateId: estimateId
       });

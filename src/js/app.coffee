@@ -2,6 +2,8 @@ Q = require 'q'
 
 require('react/lib/DOMProperty').ID_ATTRIBUTE_NAME = 'data-vrnfb-reactid'
 
+extend = require('react/lib/Object.assign');
+
 appData = {
 
 }
@@ -32,6 +34,15 @@ app =
 
     app.exapi.setCompanyData = Q.nbind api.companyData.set, api.companyData
     app.exapi.getCompanyData = Q.nbind api.companyData.get, api.companyData
+
+    app.exapi.updateCompanyData = (key, newData) ->
+      app.exapi.getCompanyData key
+      .then (storedData) ->
+        updatedData = {}
+        extend updatedData, storedData, newData
+        app.exapi.setCompanyData key, updatedData
+        .then ->
+          updatedData
 
     require('./freshBooksApi').init app, 'fbAPI'
     require('./nimbleApi').init app, 'nimbleAPI'

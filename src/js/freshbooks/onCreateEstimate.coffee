@@ -54,7 +54,7 @@ onCreateEstimate = ->
 
           if response.status is 'ok'
             clientId = response.client_id.$t
-            app.exapi.setCompanyData currentNimbleContact.id, { freshBooksClientId: clientId }
+            app.exapi.updateCompanyData currentNimbleContact.id, { freshBooksClientId: clientId }
             .then ->
               Q.resolve clientId
           else
@@ -81,7 +81,7 @@ onCreateEstimate = ->
       fbEstimateLink = app.fbAPI.getEstimateLink estimateId
       window.open fbEstimateLink, '_blank'
 
-      app.exapi.setCompanyData dealId, {
+      app.exapi.updateCompanyData dealId, {
         freshBooksClientId: currentFBContact
         freshBooksEstimateId: estimateId
       }
