@@ -40,6 +40,7 @@ module.exports = (dealInfo) ->
       member = memberInfo.resources[0]
 
       return {
+        id: member.id
         first_name: member.fields['first name']?[0]?.value
         last_name: member.fields['last name']?[0]?.value
         email: member.fields['email']?[0]?.value

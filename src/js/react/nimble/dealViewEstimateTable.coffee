@@ -1,6 +1,6 @@
 React = require 'react'
 
-{ div, table, tbody, tr, h2, a } = React.DOM
+{ div, table, tbody, tr, h2, a, select, option } = React.DOM
 
 NimbleButton = require './button'
 
@@ -27,19 +27,33 @@ NimbleDealViewEstimateTable = React.createFactory React.createClass
       td {}, line.tax2_name.$t
       td { style: textAlign: 'right' }, line.amount.$t
 
+  # onSelectContact: ->
+  #   newValue = @refs.select.getDOMNode().value
+  #   @props?.onSelectContact @props.dict.id, newValue
+
   render: ->
     div {},
 
       unless @props.fbEstimateLink?
         div { style: textAlign: 'right' },
-          NimbleButton {
-            text: 'Create estimate'
-            serviceIcon: 'freshbooks'
-            iconSize: 16
-            useSpinner: true
-            isSpinnerActive: @props.isSpinnerActive
-            onClick: @props.onCreateEstimate
-          }
+
+          if @props.companyMembers
+            select {
+              ref: 'select'
+              # onChange: @onSelectContact
+            },
+              @props.companyMembers.map (m) =>
+                option { key: m.id, value: m.id }, "#{m.first_name} #{m.last_name} (#{m.email})"
+
+          div { style: marginLeft: 10, display: 'inline-block' },
+            NimbleButton {
+              text: 'Create estimate'
+              serviceIcon: 'freshbooks'
+              iconSize: 16
+              useSpinner: true
+              isSpinnerActive: @props.isSpinnerActive
+              onClick: @props.onCreateEstimate
+            }
 
       if @props?.error?
         div {

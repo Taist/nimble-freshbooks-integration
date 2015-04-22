@@ -6,6 +6,14 @@ dealViewEstimateTable = null
 React = require 'react'
 
 renderOnDealView = (options = {}) ->
+  # app.nimbleAPI.getDealInfo()
+  # .then (dealInfo) ->
+  #
+  #   require('../nimble/prepareCompanyInfo') dealInfo
+  #
+  # .then (companyInfo) ->
+  #   { companyAddress, companyMembers, contact } = companyInfo
+
   app.exapi.getCompanyData app.nimbleAPI.getDealIdFromUrl()
   .then (dealInfo) ->
 
@@ -15,15 +23,13 @@ renderOnDealView = (options = {}) ->
     bidsketchProposalViewLink = app.bidsketchAPI.getPDFLink dealInfo?.bidsketchProposalId
     bidsketchProposalEditLink = app.bidsketchAPI.getProposalOpeningSectionsLink dealInfo?.bidsketchProposalId
 
-    reactData = {
-      fbEstimateLink: fbEstimateLink
-      alertMessage: options.alertMessage
-    }
     reactPage = require '../react/nimble/dealView'
-    React.render reactPage( reactData ), dealViewContainer
+    React.render reactPage( alertMessage: options.alertMessage ), dealViewContainer
 
     estimateTableData =
       isSpinnerActive: options.isSpinnerActive
+
+    reactComponent = require '../react/nimble/dealViewEstimateTable'
 
     if dealInfo?.freshBooksEstimateId?
       app.fbAPI.getEstimate dealInfo?.freshBooksEstimateId
@@ -59,13 +65,19 @@ renderOnDealView = (options = {}) ->
               item: estimateTableData.item
           }
 
-        reactComponent = require '../react/nimble/dealViewEstimateTable'
         React.render reactComponent( estimateTableData ), dealViewEstimateTable
 
     else
       estimateTableData.onCreateEstimate = app.actions.onCreateEstimate
-      reactComponent = require '../react/nimble/dealViewEstimateTable'
       React.render reactComponent( estimateTableData ), dealViewEstimateTable
+
+      app.nimbleAPI.getDealInfo()
+      .then (dealInfo) ->
+        require('../nimble/prepareCompanyInfo') dealInfo
+      .then (companyInfo) ->
+        { companyAddress, companyMembers, contact } = companyInfo
+        estimateTableData.companyMembers = companyMembers
+        React.render reactComponent( estimateTableData ), dealViewEstimateTable
 
   .catch (error) ->
     app.actions.onNimbleError error
