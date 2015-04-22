@@ -16,7 +16,8 @@ appErrors = {
   COMPANY_NO_PEOPLE_NO_ADDRESS: "Please link a person to a company and fill in company's address: Street address and City",
   NO_MEMBERS_WITH_EMAIL: "Please set email for the person linked to the company in the deal",
   FB_PROXY_ERROR: "Can't connect to Freshbooks. Please enable its integration with Nimble (My account -> Freshbooks API)",
-  BIDSKETCH_PROXY_ERROR: "Can't connect to Bidsketch. Please enable its integration with Nimble"
+  BIDSKETCH_PROXY_ERROR: "Can't connect to Bidsketch. Please enable its integration with Nimble",
+  ESTIMATE_IS_EMPTY: "The estimate is empty. Please fill it before creating a proposal"
 };
 
 app = {
@@ -154,6 +155,9 @@ prepareFee = function(fee, type) {
 };
 
 onCreateProposal = function(deal) {
+  if (deal.fees.item.length === 0 && deal.fees.time.length === 0) {
+    return Q.reject('ESTIMATE_IS_EMPTY');
+  }
   return app.nimbleAPI.getDealInfo().then(function(dealInfo) {
     return require('../nimble/prepareCompanyInfo')(dealInfo);
   }).then(function(companyInfo) {
@@ -797,12 +801,13 @@ renderOnDealView = function(options) {
     bidsketchProposalEditLink = app.bidsketchAPI.getProposalOpeningSectionsLink(dealInfo != null ? dealInfo.bidsketchProposalId : void 0);
     reactData = {
       fbEstimateLink: fbEstimateLink,
-      alertMessage: options.alertMessage,
-      isSpinnerActive: options.isSpinnerActive
+      alertMessage: options.alertMessage
     };
     reactPage = require('../react/nimble/dealView');
     React.render(reactPage(reactData), dealViewContainer);
-    estimateTableData = {};
+    estimateTableData = {
+      isSpinnerActive: options.isSpinnerActive
+    };
     if ((dealInfo != null ? dealInfo.freshBooksEstimateId : void 0) != null) {
       return app.fbAPI.getEstimate(dealInfo != null ? dealInfo.freshBooksEstimateId : void 0).then(function(response) {
         var reactComponent, ref, ref1, ref2, ref3, ref4, ref5, ref6;
@@ -821,12 +826,11 @@ renderOnDealView = function(options) {
             }),
             fbEstimateLink: fbEstimateLink,
             bidsketchProposalViewLink: bidsketchProposalViewLink,
-            bidsketchProposalEditLink: bidsketchProposalEditLink
+            bidsketchProposalEditLink: bidsketchProposalEditLink,
+            isSpinnerActive: options.isSpinnerActive
           };
         } else {
-          estimateTableData = {
-            error: app.getError(response)
-          };
+          estimateTableData.error = app.getError(response);
         }
         estimateTableData.onCreateProposal = function() {
           var ref7;
@@ -1160,23 +1164,51 @@ FreshBooksAPIEnablePage = React.createFactory(React.createClass({
 module.exports = FreshBooksAPIEnablePage;
 
 },{"react":197}],16:[function(require,module,exports){
-var NimbleButton, React, ServicesIcons, div;
+var NimbleButton, React, ServicesIcons, Spinner, div;
 
 React = require('react');
 
 ServicesIcons = require('../../taist/servicesIcons');
+
+Spinner = require('spin');
 
 div = React.DOM.div;
 
 NimbleButton = React.createFactory(React.createClass({
   getInitialState: function() {
     return {
-      editButtonFocusClass: ''
+      editButtonFocusClass: '',
+      isSpinnerActive: false
     };
   },
   onClick: function() {
-    var base;
-    return typeof (base = this.props).onClick === "function" ? base.onClick() : void 0;
+    if (!this.state.isSpinnerActive) {
+      return this.setState({
+        isSpinnerActive: true
+      }, (function(_this) {
+        return function() {
+          var base;
+          return typeof (base = _this.props).onClick === "function" ? base.onClick() : void 0;
+        };
+      })(this));
+    }
+  },
+  componentDidMount: function() {
+    var config, ref;
+    if (this.props.useSpinner) {
+      config = {
+        length: 4,
+        width: 2,
+        radius: 4
+      };
+      this.spinner = new Spinner(config);
+      return this.spinner.spin((ref = this.refs.spinnerContainer) != null ? ref.getDOMNode() : void 0);
+    }
+  },
+  componentWillReceiveProps: function(newProps) {
+    return this.setState({
+      isSpinnerActive: newProps.isSpinnerActive === false ? false : this.state.isSpinnerActive
+    });
   },
   render: function() {
     var ref;
@@ -1197,8 +1229,20 @@ NimbleButton = React.createFactory(React.createClass({
           });
         };
       })(this),
-      onClick: this.onClick
+      onClick: this.onClick,
+      style: {
+        position: 'relative'
+      }
     }, div({
+      ref: 'spinnerContainer',
+      style: {
+        position: 'absolute',
+        left: '50%',
+        top: '50%',
+        transform: 'translate(-50%, -50%)',
+        display: this.state.isSpinnerActive ? '' : 'none'
+      }
+    }), div({
       className: 'nmbl-ButtonContent',
       style: {
         backgroundImage: ServicesIcons.getURL(this.props.serviceIcon),
@@ -1212,21 +1256,17 @@ NimbleButton = React.createFactory(React.createClass({
 
 module.exports = NimbleButton;
 
-},{"../../taist/servicesIcons":19,"react":197}],17:[function(require,module,exports){
-var NimbleDealViewPage, React, Spinner, a, button, div, ref;
+},{"../../taist/servicesIcons":19,"react":197,"spin":198}],17:[function(require,module,exports){
+var NimbleDealViewPage, React, div;
 
 React = require('react');
 
-Spinner = require('spin');
-
-ref = React.DOM, div = ref.div, button = ref.button, a = ref.a;
+div = React.DOM.div;
 
 NimbleDealViewPage = React.createFactory(React.createClass({
   getInitialState: function() {
     return {
-      alertMessage: null,
-      focusClass: '',
-      isSpinnerActive: false
+      alertMessage: null
     };
   },
   onCloseAlert: function() {
@@ -1235,20 +1275,9 @@ NimbleDealViewPage = React.createFactory(React.createClass({
     });
   },
   alertTimeout: 5 * 1000,
-  componentDidMount: function() {
-    var config, ref1;
-    config = {
-      length: 4,
-      width: 2,
-      radius: 4
-    };
-    this.spinner = new Spinner(config);
-    return this.spinner.spin((ref1 = this.refs.spinnerContainer) != null ? ref1.getDOMNode() : void 0);
-  },
   componentWillReceiveProps: function(newProps) {
     return this.setState({
-      alertMessage: newProps.alertMessage,
-      isSpinnerActive: newProps.isSpinnerActive === false ? false : this.state.isSpinnerActive
+      alertMessage: newProps.alertMessage
     }, function() {
       if (this.state.alertMessage) {
         return setTimeout((function(_this) {
@@ -1258,15 +1287,6 @@ NimbleDealViewPage = React.createFactory(React.createClass({
         })(this), this.alertTimeout);
       }
     });
-  },
-  onCreateEstimate: function(event) {
-    return this.setState({
-      isSpinnerActive: true
-    }, (function(_this) {
-      return function() {
-        return _this.props.onCreateEstimate();
-      };
-    })(this));
   },
   render: function() {
     return div({}, div({}, this.state.alertMessage != null ? div({
@@ -1287,7 +1307,7 @@ NimbleDealViewPage = React.createFactory(React.createClass({
 
 module.exports = NimbleDealViewPage;
 
-},{"react":197,"spin":198}],18:[function(require,module,exports){
+},{"react":197}],18:[function(require,module,exports){
 var NimbleButton, NimbleDealViewEstimateTable, React, a, div, h2, ref, table, tbody, td, tr;
 
 React = require('react');
@@ -1342,6 +1362,8 @@ NimbleDealViewEstimateTable = React.createFactory(React.createClass({
       text: 'Create estimate',
       serviceIcon: 'freshbooks',
       iconSize: 16,
+      useSpinner: true,
+      isSpinnerActive: this.props.isSpinnerActive,
       onClick: this.props.onCreateEstimate
     })) : void 0, ((ref1 = this.props) != null ? ref1.error : void 0) != null ? div({
       style: {
@@ -1386,7 +1408,9 @@ NimbleDealViewEstimateTable = React.createFactory(React.createClass({
       text: 'Create proposal',
       serviceIcon: 'bidsketch',
       iconSize: 16,
-      onClick: this.props.onCreateProposal
+      onClick: this.props.onCreateProposal,
+      isSpinnerActive: this.props.isSpinnerActive,
+      useSpinner: true
     })) : div({
       style: {
         display: 'inline-block',

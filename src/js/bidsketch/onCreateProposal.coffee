@@ -11,6 +11,9 @@ prepareFee = (fee, type) ->
   unit: 'Product' if type is 'custom'
 
 onCreateProposal = (deal) ->
+  if deal.fees.item.length is 0 and deal.fees.time.length is 0
+    return Q.reject 'ESTIMATE_IS_EMPTY'
+
   app.nimbleAPI.getDealInfo()
 
   .then (dealInfo) ->

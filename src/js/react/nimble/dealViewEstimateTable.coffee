@@ -36,6 +36,8 @@ NimbleDealViewEstimateTable = React.createFactory React.createClass
             text: 'Create estimate'
             serviceIcon: 'freshbooks'
             iconSize: 16
+            useSpinner: true
+            isSpinnerActive: @props.isSpinnerActive
             onClick: @props.onCreateEstimate
           }
 
@@ -72,6 +74,8 @@ NimbleDealViewEstimateTable = React.createFactory React.createClass
                       serviceIcon: 'bidsketch'
                       iconSize: 16
                       onClick: @props.onCreateProposal
+                      isSpinnerActive: @props.isSpinnerActive
+                      useSpinner: true
                     }
                 else
                   div { style: display: 'inline-block', marginLeft: 10 },

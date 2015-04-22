@@ -16,6 +16,7 @@ appErrors =
   NO_MEMBERS_WITH_EMAIL: "Please set email for the person linked to the company in the deal"
   FB_PROXY_ERROR: "Can't connect to Freshbooks. Please enable its integration with Nimble (My account -> Freshbooks API)"
   BIDSKETCH_PROXY_ERROR: "Can't connect to Bidsketch. Please enable its integration with Nimble"
+  ESTIMATE_IS_EMPTY: "The estimate is empty. Please fill it before creating a proposal"
 
 app =
   api: null
