@@ -63,8 +63,6 @@ onCreateProposal = (deal) ->
     unless proposal?.id?
       return Q.reject proposal
 
-    console.log 'onCreateProposal', proposal
-
     fees = deal.fees.item.map (fee) ->
       -> app.bidsketchAPI.createFee proposal.id, prepareFee fee, 'custom'
 
@@ -72,13 +70,14 @@ onCreateProposal = (deal) ->
       -> app.bidsketchAPI.createFee proposal.id, prepareFee fee, 'hourly'
 
     Q.all( fees.map (f) -> f() )
-    .then () ->
+    .then ->
       dealId = app.nimbleAPI.getDealIdFromUrl()
       app.exapi.updateCompanyData dealId, { bidsketchProposalId: proposal.id }
-
-      proposal
+      .then ->
+        Q.resolve proposal
 
   .then (proposal) ->
     window.open app.bidsketchAPI.getProposalOpeningSectionsLink(proposal.id), '_blank'
+    Q.resolve proposal
 
 module.exports = onCreateProposal

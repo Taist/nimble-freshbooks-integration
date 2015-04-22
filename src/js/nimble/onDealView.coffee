@@ -9,6 +9,8 @@ renderOnDealView = (options = {}) ->
   app.exapi.getCompanyData app.nimbleAPI.getDealIdFromUrl()
   .then (dealInfo) ->
 
+    console.log dealInfo
+
     fbEstimateLink = app.fbAPI.getEstimateLink dealInfo?.freshBooksEstimateId
     bidsketchProposalViewLink = app.bidsketchAPI.getPDFLink dealInfo?.bidsketchProposalId
     bidsketchProposalEditLink = app.bidsketchAPI.getProposalOpeningSectionsLink dealInfo?.bidsketchProposalId

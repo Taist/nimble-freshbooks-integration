@@ -203,7 +203,6 @@ onCreateProposal = function(deal) {
     if ((proposal != null ? proposal.id : void 0) == null) {
       return Q.reject(proposal);
     }
-    console.log('onCreateProposal', proposal);
     fees = deal.fees.item.map(function(fee) {
       return function() {
         return app.bidsketchAPI.createFee(proposal.id, prepareFee(fee, 'custom'));
@@ -219,13 +218,15 @@ onCreateProposal = function(deal) {
     })).then(function() {
       var dealId;
       dealId = app.nimbleAPI.getDealIdFromUrl();
-      app.exapi.updateCompanyData(dealId, {
+      return app.exapi.updateCompanyData(dealId, {
         bidsketchProposalId: proposal.id
+      }).then(function() {
+        return Q.resolve(proposal);
       });
-      return proposal;
     });
   }).then(function(proposal) {
-    return window.open(app.bidsketchAPI.getProposalOpeningSectionsLink(proposal.id), '_blank');
+    window.open(app.bidsketchAPI.getProposalOpeningSectionsLink(proposal.id), '_blank');
+    return Q.resolve(proposal);
   });
 };
 
@@ -790,6 +791,7 @@ renderOnDealView = function(options) {
   }
   return app.exapi.getCompanyData(app.nimbleAPI.getDealIdFromUrl()).then(function(dealInfo) {
     var bidsketchProposalEditLink, bidsketchProposalViewLink, estimateTableData, fbEstimateLink, reactComponent, reactData, reactPage;
+    console.log(dealInfo);
     fbEstimateLink = app.fbAPI.getEstimateLink(dealInfo != null ? dealInfo.freshBooksEstimateId : void 0);
     bidsketchProposalViewLink = app.bidsketchAPI.getPDFLink(dealInfo != null ? dealInfo.bidsketchProposalId : void 0);
     bidsketchProposalEditLink = app.bidsketchAPI.getProposalOpeningSectionsLink(dealInfo != null ? dealInfo.bidsketchProposalId : void 0);
