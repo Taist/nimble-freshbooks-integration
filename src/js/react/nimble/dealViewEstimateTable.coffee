@@ -29,6 +29,16 @@ NimbleDealViewEstimateTable = React.createFactory React.createClass
 
   render: ->
     div {},
+
+      unless @props.fbEstimateLink?
+        div { style: textAlign: 'right' },
+          NimbleButton {
+            text: 'Create estimate'
+            serviceIcon: 'freshbooks'
+            iconSize: 16
+            onClick: @props.onCreateEstimate
+          }
+
       if @props?.error?
         div {
           style:
@@ -37,7 +47,7 @@ NimbleDealViewEstimateTable = React.createFactory React.createClass
             fontStyle: 'italic'
         }, @props.error
 
-      if @props?.amount?
+      if @props.fbEstimateLink?
         table { style: width: '100%' },
           tbody {},
             tr {},

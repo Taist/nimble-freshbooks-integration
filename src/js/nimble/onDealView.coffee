@@ -16,7 +16,6 @@ renderOnDealView = (options = {}) ->
     bidsketchProposalEditLink = app.bidsketchAPI.getProposalOpeningSectionsLink dealInfo?.bidsketchProposalId
 
     reactData = {
-      onCreateEstimate: app.actions.onCreateEstimate
       fbEstimateLink: fbEstimateLink
       alertMessage: options.alertMessage
       isSpinnerActive: options.isSpinnerActive
@@ -24,7 +23,7 @@ renderOnDealView = (options = {}) ->
     reactPage = require '../react/nimble/dealView'
     React.render reactPage( reactData ), dealViewContainer
 
-    estimateTableData = null
+    estimateTableData = {}
 
     if dealInfo?.freshBooksEstimateId?
       app.fbAPI.getEstimate dealInfo?.freshBooksEstimateId
@@ -48,8 +47,6 @@ renderOnDealView = (options = {}) ->
         else
           estimateTableData = { error: app.getError response }
 
-        console.log estimateTableData
-
         estimateTableData.onCreateProposal = ->
           app.actions.onCreateProposal {
             id: app.nimbleAPI.getDealIdFromUrl()
@@ -65,6 +62,7 @@ renderOnDealView = (options = {}) ->
         React.render reactComponent( estimateTableData ), dealViewEstimateTable
 
     else
+      estimateTableData.onCreateEstimate = app.actions.onCreateEstimate
       reactComponent = require '../react/nimble/dealViewEstimateTable'
       React.render reactComponent( estimateTableData ), dealViewEstimateTable
 

@@ -49,19 +49,19 @@ NimbleDealViewPage = React.createFactory React.createClass
           },
             div { className: 'gwt-Label' }, @state.alertMessage
             div { className: 'closeOrange', onClick: @onCloseAlert }
-      div { style: marginTop: 4 },
-        unless @props.fbEstimateLink?
-          a {
-            href: 'javascript:void(0)'
-            onClick: @onCreateEstimate
-          }, 'Create estimate'
-        div {
-          ref: 'spinnerContainer'
-          style:
-            position: 'relative'
-            top: -4
-            display: if @state.isSpinnerActive then 'inline-block' else 'none'
-            marginLeft: 20
-        }
+      # div { style: marginTop: 4 },
+      #   unless @props.fbEstimateLink?
+      #     a {
+      #       href: 'javascript:void(0)'
+      #       onClick: @onCreateEstimate
+      #     }, 'Create estimate'
+      #   div {
+      #     ref: 'spinnerContainer'
+      #     style:
+      #       position: 'relative'
+      #       top: -4
+      #       display: if @state.isSpinnerActive then 'inline-block' else 'none'
+      #       marginLeft: 20
+      #   }
 
 module.exports = NimbleDealViewPage
