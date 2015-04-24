@@ -67,8 +67,8 @@ app = {
         return app.actions.onNimbleError(error);
       });
     },
-    onCreateEstimate: function() {
-      return require('./freshbooks/onCreateEstimate')().then(function() {
+    onCreateEstimate: function(contactId) {
+      return require('./freshbooks/onCreateEstimate')(contactId).then(function() {
         return require('./nimble/onDealView')({
           isSpinnerActive: false
         });
@@ -553,20 +553,26 @@ app = require('../app');
 
 Q = require('q');
 
-onCreateEstimate = function() {
-  var currentFBContact, currentNimbleContact;
-  currentNimbleContact = null;
+onCreateEstimate = function(contactPersonId) {
+  var currentFBContact;
   currentFBContact = null;
   return app.nimbleAPI.getDealInfo().then(function(dealInfo) {
     return require('../nimble/prepareCompanyInfo')(dealInfo);
   }).then(function(companyInfo) {
     var companyAddress, companyMembers, contact;
     companyAddress = companyInfo.companyAddress, companyMembers = companyInfo.companyMembers, contact = companyInfo.contact;
-    return app.exapi.getCompanyData(contact.id).then(function(linkedClient) {
+    return app.exapi.getCompanyData(contactPersonId).then(function(linkedClient) {
       var additionalContacts, client, firstPerson, ref, ref1;
       if ((linkedClient != null ? linkedClient.freshBooksClientId : void 0) == null) {
-        currentNimbleContact = contact;
-        firstPerson = companyMembers.shift();
+        firstPerson = null;
+        companyMembers = companyMembers.filter(function(member) {
+          if (member.id !== contactPersonId) {
+            return true;
+          } else {
+            firstPerson = member;
+            return false;
+          }
+        });
         client = {
           first_name: {
             $t: firstPerson.first_name
@@ -621,7 +627,7 @@ onCreateEstimate = function() {
           var clientId;
           if (response.status === 'ok') {
             clientId = response.client_id.$t;
-            return app.exapi.updateCompanyData(currentNimbleContact.id, {
+            return app.exapi.updateCompanyData(contactPersonId, {
               freshBooksClientId: clientId
             }).then(function() {
               return Q.resolve(clientId);
@@ -654,7 +660,8 @@ onCreateEstimate = function() {
       window.open(fbEstimateLink, '_blank');
       return app.exapi.updateCompanyData(dealId, {
         freshBooksClientId: currentFBContact,
-        freshBooksEstimateId: estimateId
+        freshBooksEstimateId: estimateId,
+        contactPersonId: contactPersonId
       });
     } else {
       return Q.reject(response);
@@ -1358,6 +1365,10 @@ NimbleDealViewEstimateTable = React.createFactory(React.createClass({
       }
     }, line.amount.$t));
   },
+  onCreateEstimate: function() {
+    var base;
+    return typeof (base = this.props).onCreateEstimate === "function" ? base.onCreateEstimate(this.refs.selectedContact.getDOMNode().value) : void 0;
+  },
   render: function() {
     var ref1, ref10, ref11, ref12, ref2, ref3, ref4, ref5, ref6, ref7, ref8, ref9;
     return div({}, this.props.fbEstimateLink == null ? div({
@@ -1365,13 +1376,13 @@ NimbleDealViewEstimateTable = React.createFactory(React.createClass({
         textAlign: 'right'
       }
     }, this.props.companyMembers ? select({
-      ref: 'select'
+      ref: 'selectedContact'
     }, this.props.companyMembers.map((function(_this) {
       return function(m) {
         return option({
           key: m.id,
           value: m.id
-        }, m.first_name + " " + m.last_name + " (" + m.email + ")");
+        }, m.first_name + " " + m.last_name);
       };
     })(this))) : void 0, div({
       style: {
@@ -1384,7 +1395,7 @@ NimbleDealViewEstimateTable = React.createFactory(React.createClass({
       iconSize: 16,
       useSpinner: true,
       isSpinnerActive: this.props.isSpinnerActive,
-      onClick: this.props.onCreateEstimate
+      onClick: this.onCreateEstimate
     }))) : void 0, ((ref1 = this.props) != null ? ref1.error : void 0) != null ? div({
       style: {
         textAlign: 'center',

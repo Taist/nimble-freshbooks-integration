@@ -67,8 +67,8 @@ app =
       .catch (error) ->
         app.actions.onNimbleError error
 
-    onCreateEstimate: () ->
-      require('./freshbooks/onCreateEstimate')()
+    onCreateEstimate: (contactId) ->
+      require('./freshbooks/onCreateEstimate') contactId
       .then () ->
         require('./nimble/onDealView') isSpinnerActive: false
       .catch (error) ->

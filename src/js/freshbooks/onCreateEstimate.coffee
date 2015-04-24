@@ -2,8 +2,7 @@ app = require '../app'
 
 Q = require 'q'
 
-onCreateEstimate = ->
-  currentNimbleContact = null
+onCreateEstimate = (contactPersonId) ->
   currentFBContact = null
 
   app.nimbleAPI.getDealInfo()
@@ -14,13 +13,19 @@ onCreateEstimate = ->
   .then (companyInfo) ->
     { companyAddress, companyMembers, contact } = companyInfo
 
-    app.exapi.getCompanyData contact.id
+    app.exapi.getCompanyData contactPersonId
 
     .then (linkedClient) ->
       unless linkedClient?.freshBooksClientId?
-        currentNimbleContact = contact
 
-        firstPerson = companyMembers.shift()
+        firstPerson = null
+
+        companyMembers = companyMembers.filter (member) ->
+          if member.id isnt contactPersonId
+            true
+          else
+            firstPerson = member
+            false
 
         client =
           first_name: $t: firstPerson.first_name
@@ -52,7 +57,7 @@ onCreateEstimate = ->
 
           if response.status is 'ok'
             clientId = response.client_id.$t
-            app.exapi.updateCompanyData currentNimbleContact.id, { freshBooksClientId: clientId }
+            app.exapi.updateCompanyData contactPersonId, { freshBooksClientId: clientId }
             .then ->
               Q.resolve clientId
           else
@@ -81,6 +86,7 @@ onCreateEstimate = ->
       app.exapi.updateCompanyData dealId, {
         freshBooksClientId: currentFBContact
         freshBooksEstimateId: estimateId
+        contactPersonId: contactPersonId
       }
     else
       Q.reject response
