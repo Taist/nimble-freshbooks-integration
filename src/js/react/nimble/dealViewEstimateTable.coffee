@@ -1,6 +1,6 @@
 React = require 'react'
 
-{ div, table, tbody, tr, h2, a, select, option } = React.DOM
+{ div, table, tbody, tr, h2, a, select, option, span } = React.DOM
 
 NimbleButton = require './button'
 
@@ -66,7 +66,9 @@ NimbleDealViewEstimateTable = React.createFactory React.createClass
           tbody {},
             tr {},
               td { colSpan: 3 },
-                h2 { style: marginBottom: 12 }, "Estimate: #{@props.number}"
+                h2 { style: marginBottom: 12 }, "Estimate: #{@props.number}",
+                  if @props.fbContactName?
+                    span { style: fontWeight: 'normal', marginLeft: 12 }, "(#{@props.fbContactName})"
 
               td { colSpan: 4, style: textAlign: 'right' },
 

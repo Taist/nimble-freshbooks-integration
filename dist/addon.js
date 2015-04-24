@@ -816,7 +816,7 @@ renderOnDealView = function(options) {
     reactComponent = require('../react/nimble/dealViewEstimateTable');
     if ((dealInfo != null ? dealInfo.freshBooksEstimateId : void 0) != null) {
       return app.fbAPI.getEstimate(dealInfo != null ? dealInfo.freshBooksEstimateId : void 0).then(function(response) {
-        var ref, ref1, ref2, ref3, ref4, ref5, ref6;
+        var ref, ref1, ref2, ref3, ref4, ref5, ref6, ref7, ref8;
         if ((response != null ? response.status : void 0) === 'ok') {
           estimateTableData = {
             amount: (ref = response.estimate) != null ? ref.amount.$t : void 0,
@@ -833,18 +833,19 @@ renderOnDealView = function(options) {
             fbEstimateLink: fbEstimateLink,
             bidsketchProposalViewLink: bidsketchProposalViewLink,
             bidsketchProposalEditLink: bidsketchProposalEditLink,
-            isSpinnerActive: options.isSpinnerActive
+            isSpinnerActive: options.isSpinnerActive,
+            fbContactName: ((ref7 = response.estimate.first_name) != null ? ref7.$t : void 0) + " " + ((ref8 = response.estimate.last_name) != null ? ref8.$t : void 0)
           };
         } else {
           estimateTableData.error = app.getError(response);
         }
         estimateTableData.onCreateProposal = function() {
-          var ref7;
+          var ref9;
           return app.actions.onCreateProposal({
             id: app.nimbleAPI.getDealIdFromUrl(),
             info: dealInfo,
             name: document.querySelector('.dealMainFieldTitle').innerText,
-            currency: (ref7 = response.estimate) != null ? ref7.currency_code.$t : void 0,
+            currency: (ref9 = response.estimate) != null ? ref9.currency_code.$t : void 0,
             fees: {
               time: estimateTableData.time,
               item: estimateTableData.item
@@ -1321,11 +1322,11 @@ NimbleDealViewPage = React.createFactory(React.createClass({
 module.exports = NimbleDealViewPage;
 
 },{"react":197}],18:[function(require,module,exports){
-var NimbleButton, NimbleDealViewEstimateTable, React, a, div, h2, option, ref, select, table, tbody, td, tr;
+var NimbleButton, NimbleDealViewEstimateTable, React, a, div, h2, option, ref, select, span, table, tbody, td, tr;
 
 React = require('react');
 
-ref = React.DOM, div = ref.div, table = ref.table, tbody = ref.tbody, tr = ref.tr, h2 = ref.h2, a = ref.a, select = ref.select, option = ref.option;
+ref = React.DOM, div = ref.div, table = ref.table, tbody = ref.tbody, tr = ref.tr, h2 = ref.h2, a = ref.a, select = ref.select, option = ref.option, span = ref.span;
 
 NimbleButton = require('./button');
 
@@ -1412,7 +1413,12 @@ NimbleDealViewEstimateTable = React.createFactory(React.createClass({
       style: {
         marginBottom: 12
       }
-    }, "Estimate: " + this.props.number)), td({
+    }, "Estimate: " + this.props.number, this.props.fbContactName != null ? span({
+      style: {
+        fontWeight: 'normal',
+        marginLeft: 12
+      }
+    }, "(" + this.props.fbContactName + ")") : void 0)), td({
       colSpan: 4,
       style: {
         textAlign: 'right'

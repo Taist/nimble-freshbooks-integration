@@ -6,14 +6,6 @@ dealViewEstimateTable = null
 React = require 'react'
 
 renderOnDealView = (options = {}) ->
-  # app.nimbleAPI.getDealInfo()
-  # .then (dealInfo) ->
-  #
-  #   require('../nimble/prepareCompanyInfo') dealInfo
-  #
-  # .then (companyInfo) ->
-  #   { companyAddress, companyMembers, contact } = companyInfo
-
   app.exapi.getCompanyData app.nimbleAPI.getDealIdFromUrl()
   .then (dealInfo) ->
 
@@ -49,6 +41,7 @@ renderOnDealView = (options = {}) ->
             bidsketchProposalViewLink: bidsketchProposalViewLink
             bidsketchProposalEditLink: bidsketchProposalEditLink
             isSpinnerActive: options.isSpinnerActive
+            fbContactName: "#{response.estimate.first_name?.$t} #{response.estimate.last_name?.$t}"
           }
 
         else
