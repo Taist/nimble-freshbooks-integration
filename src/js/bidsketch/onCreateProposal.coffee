@@ -22,12 +22,19 @@ onCreateProposal = (deal) ->
   .then (companyInfo) ->
     { companyAddress, companyMembers, contact } = companyInfo
 
-    app.exapi.getCompanyData contact.id
+    app.exapi.getCompanyData deal.info.contactPersonId
     .then (linkedClient) ->
       unless linkedClient?.bidsketchClientId?
-        # currentNimbleContact = contact
 
-        firstPerson = companyMembers.shift()
+        firstPerson = null
+
+        companyMembers = companyMembers.filter (member) ->
+          if member.id isnt deal.info.contactPersonId
+            true
+          else
+            firstPerson = member
+            false
+
         client =
           first_name: firstPerson.first_name
           last_name: firstPerson.last_name
@@ -44,7 +51,7 @@ onCreateProposal = (deal) ->
         .then (response) ->
           if response?.id?
             clientId = response.id
-            app.exapi.updateCompanyData contact.id, { bidsketchClientId: clientId }
+            app.exapi.updateCompanyData deal.info.contactPersonId, { bidsketchClientId: clientId }
               .then ->
                 Q.resolve clientId
           else

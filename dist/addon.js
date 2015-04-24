@@ -163,10 +163,18 @@ onCreateProposal = function(deal) {
   }).then(function(companyInfo) {
     var companyAddress, companyMembers, contact;
     companyAddress = companyInfo.companyAddress, companyMembers = companyInfo.companyMembers, contact = companyInfo.contact;
-    return app.exapi.getCompanyData(contact.id).then(function(linkedClient) {
+    return app.exapi.getCompanyData(deal.info.contactPersonId).then(function(linkedClient) {
       var client, firstPerson, ref, ref1;
       if ((linkedClient != null ? linkedClient.bidsketchClientId : void 0) == null) {
-        firstPerson = companyMembers.shift();
+        firstPerson = null;
+        companyMembers = companyMembers.filter(function(member) {
+          if (member.id !== deal.info.contactPersonId) {
+            return true;
+          } else {
+            firstPerson = member;
+            return false;
+          }
+        });
         client = {
           first_name: firstPerson.first_name,
           last_name: firstPerson.last_name,
@@ -182,7 +190,7 @@ onCreateProposal = function(deal) {
           var clientId;
           if ((response != null ? response.id : void 0) != null) {
             clientId = response.id;
-            return app.exapi.updateCompanyData(contact.id, {
+            return app.exapi.updateCompanyData(deal.info.contactPersonId, {
               bidsketchClientId: clientId
             }).then(function() {
               return Q.resolve(clientId);
