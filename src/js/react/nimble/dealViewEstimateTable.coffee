@@ -28,7 +28,7 @@ NimbleDealViewEstimateTable = React.createFactory React.createClass
       td { style: textAlign: 'right' }, line.amount.$t
 
   onCreateEstimate: ->
-    @props.onCreateEstimate? @refs.selectedContact.getDOMNode().value
+    @props.onCreateEstimate? @refs.selectedContact?.getDOMNode().value
 
   render: ->
     div {},

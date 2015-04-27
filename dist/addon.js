@@ -872,6 +872,8 @@ renderOnDealView = function(options) {
         companyAddress = companyInfo.companyAddress, companyMembers = companyInfo.companyMembers, contact = companyInfo.contact;
         estimateTableData.companyMembers = companyMembers;
         return React.render(reactComponent(estimateTableData), dealViewEstimateTable);
+      })["catch"](function() {
+        return React.render(reactComponent(estimateTableData), dealViewEstimateTable);
       });
     }
   })["catch"](function(error) {
@@ -1375,8 +1377,8 @@ NimbleDealViewEstimateTable = React.createFactory(React.createClass({
     }, line.amount.$t));
   },
   onCreateEstimate: function() {
-    var base;
-    return typeof (base = this.props).onCreateEstimate === "function" ? base.onCreateEstimate(this.refs.selectedContact.getDOMNode().value) : void 0;
+    var base, ref1;
+    return typeof (base = this.props).onCreateEstimate === "function" ? base.onCreateEstimate((ref1 = this.refs.selectedContact) != null ? ref1.getDOMNode().value : void 0) : void 0;
   },
   render: function() {
     var ref1, ref10, ref11, ref12, ref2, ref3, ref4, ref5, ref6, ref7, ref8, ref9;
