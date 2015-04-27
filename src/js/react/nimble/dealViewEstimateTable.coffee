@@ -28,7 +28,7 @@ NimbleDealViewEstimateTable = React.createFactory React.createClass
       td { style: textAlign: 'right' }, line.amount.$t
 
   onCreateEstimate: ->
-    @props.onCreateEstimate? @refs.selectedContact.getDOMNode().value
+    @props.onCreateEstimate? @refs.selectedContact?.getDOMNode().value
 
   render: ->
     div {},
@@ -37,11 +37,13 @@ NimbleDealViewEstimateTable = React.createFactory React.createClass
         div { style: textAlign: 'right' },
 
           if @props.companyMembers
-            select {
-              ref: 'selectedContact'
-            },
-              @props.companyMembers.map (m) =>
-                option { key: m.id, value: m.id }, "#{m.first_name} #{m.last_name}"
+            div { style: display: 'inline-block' },
+              span {  style: marginRight: 6 }, 'Receiver:'
+              select {
+                ref: 'selectedContact'
+              },
+                @props.companyMembers.map (m) =>
+                  option { key: m.id, value: m.id }, "#{m.first_name} #{m.last_name}"
 
           div { style: marginLeft: 10, display: 'inline-block' },
             NimbleButton {

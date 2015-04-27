@@ -71,6 +71,8 @@ renderOnDealView = (options = {}) ->
         { companyAddress, companyMembers, contact } = companyInfo
         estimateTableData.companyMembers = companyMembers
         React.render reactComponent( estimateTableData ), dealViewEstimateTable
+      .catch ->
+        React.render reactComponent( estimateTableData ), dealViewEstimateTable
 
   .catch (error) ->
     app.actions.onNimbleError error

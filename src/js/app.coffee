@@ -55,8 +55,11 @@ app =
   actions:
     onNimbleError: (messageCode) ->
       console.log 'onNimbleError', messageCode
+      alertMessage = app.getError messageCode
+      if messageCode?.error?.$t?
+        alertMessage = "FreshBooks error: #{messageCode.error.$t}"
       require('./nimble/onDealView') {
-        alertMessage: app.getError messageCode
+        alertMessage: alertMessage
         isSpinnerActive: false
       }
 
