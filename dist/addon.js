@@ -52,9 +52,14 @@ app = {
   },
   actions: {
     onNimbleError: function(messageCode) {
+      var alertMessage, ref;
       console.log('onNimbleError', messageCode);
+      alertMessage = app.getError(messageCode);
+      if ((messageCode != null ? (ref = messageCode.error) != null ? ref.$t : void 0 : void 0) != null) {
+        alertMessage = "FreshBooks error: " + messageCode.error.$t;
+      }
       return require('./nimble/onDealView')({
-        alertMessage: app.getError(messageCode),
+        alertMessage: alertMessage,
         isSpinnerActive: false
       });
     },
