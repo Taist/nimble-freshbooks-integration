@@ -1,9 +1,9 @@
 {
   "id": "nimble-freshbooks-estimates",
   "title": "[beta] Freshbooks estimates",
-  "siteName": "Nimble",
+  "siteName": "Nimble, Freshbooks, Bidsketch",
   "js": "addon.js",
-  "shortDescription": "Embeds estimates from Freshbooks into Deals",
+  "shortDescription": "Allows to create Freshbooks Estimates and Bidsketch Proposals directly from Nimble Deals",
   "siteRegexp": "(freshbooks|nimble|bidsketch)\\.com",
   "description": "./addon-description.md"
 }
