@@ -1,6 +1,6 @@
 {
   "id": "nimble-freshbooks-estimates",
-  "title": "[beta] Freshbooks estimates",
+  "title": "Estimates and proposals",
   "siteName": "Nimble, Freshbooks, Bidsketch",
   "js": "addon.js",
   "shortDescription": "Allows to create Freshbooks Estimates and Bidsketch Proposals directly from Nimble Deals",
