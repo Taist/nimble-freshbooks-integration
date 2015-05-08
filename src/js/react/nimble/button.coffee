@@ -39,6 +39,7 @@ NimbleButton = React.createFactory React.createClass
       onClick: @onClick
       style:
         position: 'relative'
+        width: 116
     },
       div {
         ref: 'spinnerContainer'

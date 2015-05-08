@@ -1260,7 +1260,8 @@ NimbleButton = React.createFactory(React.createClass({
       })(this),
       onClick: this.onClick,
       style: {
-        position: 'relative'
+        position: 'relative',
+        width: 116
       }
     }, div({
       ref: 'spinnerContainer',
@@ -1474,7 +1475,8 @@ NimbleDealViewEstimateTable = React.createFactory(React.createClass({
     })) : div({
       style: {
         display: 'inline-block',
-        marginLeft: 10
+        marginLeft: 10,
+        marginTop: 10
       }
     }, a({
       href: this.props.bidsketchProposalEditLink,

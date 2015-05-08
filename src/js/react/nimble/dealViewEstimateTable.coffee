@@ -94,7 +94,7 @@ NimbleDealViewEstimateTable = React.createFactory React.createClass
                       useSpinner: true
                     }
                 else
-                  div { style: display: 'inline-block', marginLeft: 10 },
+                  div { style: display: 'inline-block', marginLeft: 10, marginTop: 10 },
                     a {
                       href: @props.bidsketchProposalEditLink
                       target: '_blank'
