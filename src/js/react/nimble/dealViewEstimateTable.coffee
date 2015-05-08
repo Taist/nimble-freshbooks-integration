@@ -36,17 +36,14 @@ NimbleDealViewEstimateTable = React.createFactory React.createClass
       unless @props.fbEstimateLink?
         div { style: textAlign: 'right' },
 
-          div { style: display: 'inline-block' },
-            span {  style: marginRight: 6, minWidth: 160 }, 'Receiver:'
-            if @props.companyMembers
+          if @props.companyMembers
+            div { style: display: 'inline-block' },
+              span {  style: marginRight: 6 }, 'Receiver:'
               select {
                 ref: 'selectedContact'
               },
                 @props.companyMembers.map (m) =>
                   option { key: m.id, value: m.id }, "#{m.first_name} #{m.last_name}"
-            else
-              select { style: minWidth: 160 },
-                option {}, 'No valid company members'
 
           div { style: marginLeft: 10, display: 'inline-block' },
             NimbleButton {

@@ -1391,16 +1391,15 @@ NimbleDealViewEstimateTable = React.createFactory(React.createClass({
       style: {
         textAlign: 'right'
       }
-    }, div({
+    }, this.props.companyMembers ? div({
       style: {
         display: 'inline-block'
       }
     }, span({
       style: {
-        marginRight: 6,
-        minWidth: 160
+        marginRight: 6
       }
-    }, 'Receiver:'), this.props.companyMembers ? select({
+    }, 'Receiver:'), select({
       ref: 'selectedContact'
     }, this.props.companyMembers.map((function(_this) {
       return function(m) {
@@ -1409,11 +1408,7 @@ NimbleDealViewEstimateTable = React.createFactory(React.createClass({
           value: m.id
         }, m.first_name + " " + m.last_name);
       };
-    })(this))) : select({
-      style: {
-        minWidth: 160
-      }
-    }, option({}, 'No valid company members'))), div({
+    })(this)))) : void 0, div({
       style: {
         marginLeft: 10,
         display: 'inline-block'
