@@ -1,4 +1,5 @@
 The addon saves a lot of time and effort on working with estimates and proposals via Nimble, Freshbooks and (optionally) Bidsketch:
+
 * Freshbooks estimates can be created and viewed directly from Nimble; when an Estimate is created, a company attached to Deal is copied into Freshbooks;
 * BidSketch proposals can be created and viewed directly from Nimble; again, the company from Nimble is copied to Bidsketch, and the proposal is filled with positions from the estimate.
 
